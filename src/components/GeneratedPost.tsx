@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,20 +5,17 @@ import { toast } from "sonner";
 import { Twitter, Copy, Share } from "lucide-react";
 import { postToTwitter } from "@/services/postGeneratorService";
 import { Skeleton } from "@/components/ui/skeleton";
-
 interface GeneratedPostProps {
   content: string;
   onRequestAnother?: () => void;
   isLoading?: boolean;
 }
-
 const GeneratedPost = ({
   content,
   onRequestAnother,
   isLoading = false
 }: GeneratedPostProps) => {
   const [copied, setCopied] = useState(false);
-  
   const handleCopy = () => {
     navigator.clipboard.writeText(content).then(() => {
       setCopied(true);
@@ -29,15 +25,12 @@ const GeneratedPost = ({
       toast.error("Failed to copy post");
     });
   };
-  
   const handlePostToTwitter = () => {
     postToTwitter(content);
     toast.success("Opening Twitter to share your post");
   };
-  
   if (isLoading) {
-    return (
-      <Card className="w-full border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300 rounded-xl dark:bg-gray-800 card-modern animate-pulse">
+    return <Card className="w-full border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300 rounded-xl dark:bg-gray-800 card-modern animate-pulse">
         <CardContent className="p-5">
           <div className="bg-white dark:bg-gray-900 rounded-xl p-5 border border-gray-100 dark:border-gray-800 min-h-[120px]">
             {/* Twitter-like skeleton format */}
@@ -67,13 +60,10 @@ const GeneratedPost = ({
             <Skeleton className="h-9 w-20" />
           </div>
         </CardFooter>
-      </Card>
-    );
+      </Card>;
   }
-  
-  return (
-    <Card className="w-full border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300 rounded-xl dark:bg-gray-800 card-modern">
-      <CardContent className="p-5">
+  return <Card className="w-full border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300 rounded-xl dark:bg-gray-800 card-modern">
+      <CardContent className="p-1">
         <div className="bg-white dark:bg-gray-900 rounded-xl p-5 border border-gray-100 dark:border-gray-800 min-h-[120px] relative">
           {/* Twitter-like post format */}
           <div className="flex mb-3">
@@ -98,31 +88,19 @@ const GeneratedPost = ({
         </div>
       </CardContent>
       
-      <CardFooter className="bg-gray-50 dark:bg-gray-800 rounded-b-xl flex flex-wrap gap-2 justify-between py-3 px-4 border-t border-gray-100 dark:border-gray-700">
+      <CardFooter className="bg-gray-50 dark:bg-gray-800 rounded-b-xl flex flex-wrap gap-2 justify-between py-3 px-3 border-t border-gray-100 dark:border-gray-700">
         <div className="flex gap-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={handleCopy} 
-            className="bg-white text-gray-600 hover:text-twitter-blue hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-300 dark:hover:text-white dark:border-gray-600 rounded-lg button-modern" 
-            disabled={copied}
-          >
+          <Button variant="outline" size="sm" onClick={handleCopy} className="bg-white text-gray-600 hover:text-twitter-blue hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-300 dark:hover:text-white dark:border-gray-600 rounded-lg button-modern" disabled={copied}>
             {copied ? "Copied!" : "Copy"}
             <Copy className="ml-2 h-4 w-4" />
           </Button>
           
-          <Button 
-            onClick={handlePostToTwitter} 
-            size="sm" 
-            className="bg-twitter-blue hover:bg-twitter-darkBlue text-white rounded-lg button-modern"
-          >
+          <Button onClick={handlePostToTwitter} size="sm" className="bg-twitter-blue hover:bg-twitter-darkBlue text-white rounded-lg button-modern">
             Share
             <Twitter className="ml-2 h-4 w-4" />
           </Button>
         </div>
       </CardFooter>
-    </Card>
-  );
+    </Card>;
 };
-
 export default GeneratedPost;

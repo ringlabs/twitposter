@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Settings, Moon, Sun, MessageSquare, Sparkles } from "lucide-react";
@@ -11,26 +10,24 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useIsMobile } from "@/hooks/use-mobile";
 import { toast } from "sonner";
 import { ScrollArea } from "@/components/ui/scroll-area";
-
 interface HeaderProps {
   onGeneratePost: (specifyTopic?: boolean) => void;
 }
-
 const Header = ({
   onGeneratePost
 }: HeaderProps) => {
-  const { theme, setTheme } = useTheme();
+  const {
+    theme,
+    setTheme
+  } = useTheme();
   const [sheetOpen, setSheetOpen] = useState(false);
   const [settingsTab, setSettingsTab] = useState<string>("niche");
   const isMobile = useIsMobile();
-
   const toggleTheme = () => {
     setTheme(theme === "dark" ? "light" : "dark");
     toast.success(`Switched to ${theme === "dark" ? "light" : "dark"} mode`);
   };
-
-  return (
-    <div className="w-full border-b border-gray-200 dark:border-gray-800 pb-4 mb-6 pt-4">
+  return <div className="w-full border-b border-gray-200 dark:border-gray-800 pb-4 mb-6 pt-4 py-[10px]">
       <div className="flex items-center justify-between">
         <div className="flex items-center">
           <div className="relative mr-2">
@@ -39,30 +36,19 @@ const Header = ({
               <span className="absolute -top-1 -right-1 w-3 h-3 bg-white rounded-full animate-pulse"></span>
             </div>
           </div>
-          {!isMobile && (
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white ml-2">
+          {!isMobile && <h1 className="text-2xl font-bold text-gray-900 dark:text-white ml-2">
               TwitWise<span className="text-twitter-blue">Creator</span>
-            </h1>
-          )}
+            </h1>}
         </div>
         
         <div className="flex items-center gap-2">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={toggleTheme}
-            className="rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-          >
+          <Button variant="ghost" size="icon" onClick={toggleTheme} className="rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">
             {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
           </Button>
           
           <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
             <SheetTrigger asChild>
-              <Button 
-                variant="outline" 
-                size="icon" 
-                className="rounded-full border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 button-modern"
-              >
+              <Button variant="outline" size="icon" className="rounded-full border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 button-modern">
                 <Settings className="h-4 w-4" />
               </Button>
             </SheetTrigger>
@@ -73,44 +59,22 @@ const Header = ({
                   Settings
                 </SheetTitle>
                 <div className="flex mt-4 sm:mt-0 space-x-2">
-                  <Button
-                    variant={settingsTab === "niche" ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setSettingsTab("niche")}
-                    className={`rounded-lg ${
-                      settingsTab === "niche" 
-                        ? "bg-twitter-blue text-white" 
-                        : "dark:border-gray-700 dark:text-gray-300"
-                    }`}
-                  >
+                  <Button variant={settingsTab === "niche" ? "default" : "outline"} size="sm" onClick={() => setSettingsTab("niche")} className={`rounded-lg ${settingsTab === "niche" ? "bg-twitter-blue text-white" : "dark:border-gray-700 dark:text-gray-300"}`}>
                     Niche
                   </Button>
-                  <Button
-                    variant={settingsTab === "api-key" ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setSettingsTab("api-key")}
-                    className={`rounded-lg ${
-                      settingsTab === "api-key" 
-                        ? "bg-twitter-blue text-white" 
-                        : "dark:border-gray-700 dark:text-gray-300"
-                    }`}
-                  >
+                  <Button variant={settingsTab === "api-key" ? "default" : "outline"} size="sm" onClick={() => setSettingsTab("api-key")} className={`rounded-lg ${settingsTab === "api-key" ? "bg-twitter-blue text-white" : "dark:border-gray-700 dark:text-gray-300"}`}>
                     API Key
                   </Button>
                 </div>
               </SheetHeader>
               <ScrollArea className="h-[calc(100vh-130px)]">
                 <div className="p-6">
-                  {settingsTab === "niche" && (
-                    <div className="animate-fade-in">
+                  {settingsTab === "niche" && <div className="animate-fade-in">
                       <NicheSelector onComplete={() => setSheetOpen(false)} inSettings={true} />
-                    </div>
-                  )}
-                  {settingsTab === "api-key" && (
-                    <div className="animate-fade-in">
+                    </div>}
+                  {settingsTab === "api-key" && <div className="animate-fade-in">
                       <ApiKeyManager />
-                    </div>
-                  )}
+                    </div>}
                 </div>
               </ScrollArea>
             </SheetContent>
@@ -123,21 +87,12 @@ const Header = ({
                 Create
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent 
-              className="w-56 p-2 mt-2 rounded-xl border border-gray-200 dark:border-gray-700 shadow-lg dark:bg-gray-800" 
-              align="end"
-            >
-              <DropdownMenuItem 
-                className="flex items-center p-3 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white" 
-                onClick={() => onGeneratePost(false)}
-              >
+            <DropdownMenuContent className="w-56 p-2 mt-2 rounded-xl border border-gray-200 dark:border-gray-700 shadow-lg dark:bg-gray-800" align="end">
+              <DropdownMenuItem className="flex items-center p-3 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white" onClick={() => onGeneratePost(false)}>
                 <Sparkles className="mr-2 h-4 w-4 text-twitter-blue" />
                 <span>Auto Generate</span>
               </DropdownMenuItem>
-              <DropdownMenuItem 
-                className="flex items-center p-3 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white" 
-                onClick={() => onGeneratePost(true)}
-              >
+              <DropdownMenuItem className="flex items-center p-3 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white" onClick={() => onGeneratePost(true)}>
                 <MessageSquare className="mr-2 h-4 w-4 text-twitter-blue" />
                 <span>Specify Topic</span>
               </DropdownMenuItem>
@@ -145,8 +100,6 @@ const Header = ({
           </DropdownMenu>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default Header;
