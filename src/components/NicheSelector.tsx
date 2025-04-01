@@ -44,19 +44,19 @@ const NicheSelector = ({ onComplete, inSettings = false }: NicheSelectorProps) =
   if (inSettings) {
     return (
       <div className="space-y-4">
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {NICHES.map((niche) => (
             <Button
               key={niche.id}
               variant={selectedNiche === niche.id ? "default" : "outline"}
-              className={`h-auto py-2 px-2 flex flex-col items-center justify-center transition-all min-h-[40px] ${
+              className={`h-auto py-3 px-3 flex flex-col items-center justify-center transition-all ${
                 selectedNiche === niche.id 
                   ? "bg-twitter-blue hover:bg-twitter-darkBlue dark:text-white" 
                   : "hover:border-twitter-blue hover:text-twitter-blue dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
               }`}
               onClick={() => handleNicheSelect(niche.id)}
             >
-              <span className="text-center text-sm break-words hyphens-auto w-full leading-tight">{niche.name}</span>
+              <span className="text-center text-sm w-full whitespace-normal break-words">{niche.name}</span>
             </Button>
           ))}
         </div>
@@ -80,19 +80,19 @@ const NicheSelector = ({ onComplete, inSettings = false }: NicheSelectorProps) =
           </CardDescription>
         </CardHeader>
         <CardContent className="p-6 dark:bg-gray-800">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
             {NICHES.map((niche) => (
               <Button
                 key={niche.id}
                 variant={selectedNiche === niche.id ? "default" : "outline"}
-                className={`h-auto py-3 px-2 flex flex-col items-center justify-center transition-all min-h-[56px] ${
+                className={`h-auto py-3 px-3 flex flex-col items-center justify-center transition-all min-h-[56px] ${
                   selectedNiche === niche.id 
                     ? "bg-twitter-blue hover:bg-twitter-darkBlue dark:text-white" 
                     : "hover:border-twitter-blue hover:text-twitter-blue dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
                 }`}
                 onClick={() => handleNicheSelect(niche.id)}
               >
-                <span className="text-center break-words hyphens-auto w-full leading-tight">{niche.name}</span>
+                <span className="text-center w-full whitespace-normal break-words">{niche.name}</span>
               </Button>
             ))}
           </div>
