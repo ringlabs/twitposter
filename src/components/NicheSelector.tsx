@@ -56,7 +56,7 @@ const NicheSelector = ({ onComplete, inSettings = false }: NicheSelectorProps) =
               }`}
               onClick={() => handleNicheSelect(niche.id)}
             >
-              <span className="text-center text-sm line-clamp-2 leading-tight">{niche.name}</span>
+              <span className="text-center text-sm break-words hyphens-auto w-full leading-tight">{niche.name}</span>
             </Button>
           ))}
         </div>
@@ -92,7 +92,7 @@ const NicheSelector = ({ onComplete, inSettings = false }: NicheSelectorProps) =
                 }`}
                 onClick={() => handleNicheSelect(niche.id)}
               >
-                <span className="text-center line-clamp-2 leading-tight">{niche.name}</span>
+                <span className="text-center break-words hyphens-auto w-full leading-tight">{niche.name}</span>
               </Button>
             ))}
           </div>
