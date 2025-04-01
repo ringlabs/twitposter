@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { toast } from "sonner";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface HeaderProps {
   onGeneratePost: (specifyTopic?: boolean) => void;
@@ -20,6 +21,7 @@ const Header = ({
 }: HeaderProps) => {
   const { theme, setTheme } = useTheme();
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [settingsTab, setSettingsTab] = useState<string>("niche");
   const isMobile = useIsMobile();
 
   const toggleTheme = () => {
@@ -65,36 +67,52 @@ const Header = ({
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-full p-0 sm:max-w-md dark:bg-gray-900 dark:border-gray-800 rounded-l-xl">
-              <SheetHeader className="p-6 border-b dark:border-gray-800">
+              <SheetHeader className="p-6 border-b dark:border-gray-800 flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <SheetTitle className="text-xl dark:text-white flex items-center">
                   <Settings className="mr-2 h-5 w-5" />
                   Settings
                 </SheetTitle>
+                <div className="flex mt-4 sm:mt-0 space-x-2">
+                  <Button
+                    variant={settingsTab === "niche" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setSettingsTab("niche")}
+                    className={`rounded-lg ${
+                      settingsTab === "niche" 
+                        ? "bg-twitter-blue text-white" 
+                        : "dark:border-gray-700 dark:text-gray-300"
+                    }`}
+                  >
+                    Niche
+                  </Button>
+                  <Button
+                    variant={settingsTab === "api-key" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setSettingsTab("api-key")}
+                    className={`rounded-lg ${
+                      settingsTab === "api-key" 
+                        ? "bg-twitter-blue text-white" 
+                        : "dark:border-gray-700 dark:text-gray-300"
+                    }`}
+                  >
+                    API Key
+                  </Button>
+                </div>
               </SheetHeader>
-              <div className="p-6">
-                <Tabs defaultValue="niche" className="w-full">
-                  <TabsList className="grid w-full grid-cols-2 dark:bg-gray-800 rounded-lg mb-4">
-                    <TabsTrigger 
-                      value="niche"
-                      className="rounded-lg data-[state=active]:bg-twitter-blue data-[state=active]:text-white dark:data-[state=active]:bg-twitter-blue dark:data-[state=active]:text-white dark:text-gray-300"
-                    >
-                      Niche
-                    </TabsTrigger>
-                    <TabsTrigger 
-                      value="api-key"
-                      className="rounded-lg data-[state=active]:bg-twitter-blue data-[state=active]:text-white dark:data-[state=active]:bg-twitter-blue dark:data-[state=active]:text-white dark:text-gray-300"
-                    >
-                      API Key
-                    </TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="niche" className="animate-fade-in">
-                    <NicheSelector onComplete={() => setSheetOpen(false)} inSettings={true} />
-                  </TabsContent>
-                  <TabsContent value="api-key" className="animate-fade-in">
-                    <ApiKeyManager />
-                  </TabsContent>
-                </Tabs>
-              </div>
+              <ScrollArea className="h-[calc(100vh-130px)]">
+                <div className="p-6">
+                  {settingsTab === "niche" && (
+                    <div className="animate-fade-in">
+                      <NicheSelector onComplete={() => setSheetOpen(false)} inSettings={true} />
+                    </div>
+                  )}
+                  {settingsTab === "api-key" && (
+                    <div className="animate-fade-in">
+                      <ApiKeyManager />
+                    </div>
+                  )}
+                </div>
+              </ScrollArea>
             </SheetContent>
           </Sheet>
           

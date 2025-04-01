@@ -213,12 +213,13 @@ const PostGenerator = () => {
         </Card>
       )}
 
-      {isGenerating && postHistory.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-16 animate-fade-in">
-          <div className="animate-pulse flex flex-col items-center bg-white dark:bg-gray-800 p-8 rounded-xl shadow-md">
-            <Sparkles className="h-12 w-12 text-twitter-blue mb-4" />
-            <p className="text-twitter-darkGray dark:text-gray-300 font-medium">Crafting your perfect tweet...</p>
-          </div>
+      {/* Show skeleton when generating and no posts exist */}
+      {isGenerating && (
+        <div className="mb-6 animate-fade-in">
+          <GeneratedPost 
+            content="" 
+            isLoading={true} 
+          />
         </div>
       )}
 
