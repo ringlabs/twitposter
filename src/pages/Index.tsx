@@ -5,7 +5,15 @@ import { useTheme } from '@/hooks/useTheme';
 
 const Index = () => {
   const navigate = useNavigate();
-  const { theme } = useTheme();
+  
+  // Try-catch to handle any potential theme errors 
+  let themeValue = 'light';
+  try {
+    const { theme } = useTheme();
+    themeValue = theme;
+  } catch (error) {
+    console.error("Error using theme in Index:", error);
+  }
 
   useEffect(() => {
     const timer = setTimeout(() => {
