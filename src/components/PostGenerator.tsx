@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -6,12 +7,13 @@ import { LOCAL_STORAGE_NICHE_KEY } from "@/constants/niches";
 import { generatePost, isFreeTrialExhausted, getFreeTrialUsage, getApiKey } from "@/services/postGeneratorService";
 import GeneratedPost from "./GeneratedPost";
 import { NICHES } from "@/constants/niches";
-import { Sparkles, Pencil, KeyRound } from "lucide-react";
+import { Sparkles, Pencil, KeyRound, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import Header from "./Header";
 import { useIsMobile } from "@/hooks/use-mobile";
 import ApiKeyInput from "./ApiKeyInput";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+
 interface Post {
   id: string;
   content: string;
@@ -19,7 +21,9 @@ interface Post {
   nicheId: string;
   topic?: string;
 }
+
 const POSTS_STORAGE_KEY = "twitter_generated_posts";
+
 const PostGenerator = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [showSpecifyForm, setShowSpecifyForm] = useState(false);
@@ -27,11 +31,13 @@ const PostGenerator = () => {
   const [postHistory, setPostHistory] = useState<Post[]>([]);
   const [showApiKeyModal, setShowApiKeyModal] = useState(false);
   const isMobile = useIsMobile();
+
   const selectedNicheId = localStorage.getItem(LOCAL_STORAGE_NICHE_KEY) || "general";
   const selectedNiche = NICHES.find(niche => niche.id === selectedNicheId) || {
     id: "general",
     name: "General"
   };
+
   const hasFreeTrialPosts = !isFreeTrialExhausted();
   const freeTrialRemaining = 5 - getFreeTrialUsage();
   const userHasApiKey = !!getApiKey();
@@ -53,6 +59,7 @@ const PostGenerator = () => {
   useEffect(() => {
     localStorage.setItem(POSTS_STORAGE_KEY, JSON.stringify(postHistory));
   }, [postHistory]);
+
   const addPostToHistory = (content: string, topic?: string) => {
     const newPost: Post = {
       id: Date.now().toString(),
@@ -63,15 +70,18 @@ const PostGenerator = () => {
     };
     setPostHistory(prevPosts => [newPost, ...prevPosts]);
   };
+
   const handleAutoGenerate = async () => {
     if (!userHasApiKey && !hasFreeTrialPosts) {
       setShowApiKeyModal(true);
       return;
     }
+
     setIsGenerating(true);
     try {
       const post = await generatePost(selectedNicheId);
       addPostToHistory(post);
+      
       if (!userHasApiKey && hasFreeTrialPosts) {
         const remainingPosts = freeTrialRemaining - 1;
         toast.info(`You have ${remainingPosts} free trial posts remaining`);
@@ -87,18 +97,23 @@ const PostGenerator = () => {
       setIsGenerating(false);
     }
   };
+
   const handleSpecificGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
+    
     if (!userHasApiKey && !hasFreeTrialPosts) {
       setShowApiKeyModal(true);
       return;
     }
+
     setIsGenerating(true);
     setShowSpecifyForm(false);
+    
     try {
       const post = await generatePost(selectedNicheId, specificTopic);
       addPostToHistory(post, specificTopic);
       setSpecificTopic("");
+      
       if (!userHasApiKey && hasFreeTrialPosts) {
         const remainingPosts = freeTrialRemaining - 1;
         toast.info(`You have ${remainingPosts} free trial posts remaining`);
@@ -114,6 +129,7 @@ const PostGenerator = () => {
       setIsGenerating(false);
     }
   };
+
   const handleGeneratePost = (specifyTopic = false) => {
     if (specifyTopic) {
       setShowSpecifyForm(true);
@@ -121,58 +137,115 @@ const PostGenerator = () => {
       handleAutoGenerate();
     }
   };
+
   const handleApiKeySetup = () => {
     setShowApiKeyModal(false);
   };
-  return <div className="w-full max-w-2xl mx-auto px-0">
+
+  return (
+    <div className="w-full max-w-2xl mx-auto px-4 md:px-0">
       <Header onGeneratePost={handleGeneratePost} />
       
-      {!isMobile && <div>
-          <p className="text-twitter-darkGray dark:text-gray-300 mb-4">
-            Currently generating posts for <span className="font-medium text-twitter-blue">{selectedNiche.name}</span>
-          </p>
-          {!userHasApiKey && hasFreeTrialPosts && <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md p-3 mb-4">
-              <p className="text-sm text-blue-700 dark:text-blue-300">
-                <span className="font-medium">Free Trial: </span> 
-                You have {freeTrialRemaining} posts remaining. Enter your API key in settings to continue generating posts after your trial ends.
+      {!isMobile && (
+        <div className="animate-fade-in">
+          <div className="flex items-center mb-6 bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-100 dark:border-gray-700">
+            <div className="flex-1">
+              <p className="text-twitter-darkGray dark:text-gray-300 mb-1">
+                Currently generating posts for <span className="font-medium text-twitter-blue">{selectedNiche.name}</span>
               </p>
-            </div>}
-        </div>}
+              {!userHasApiKey && hasFreeTrialPosts && (
+                <p className="text-sm text-blue-700 dark:text-blue-300">
+                  <span className="font-medium">Free Trial: </span> 
+                  You have {freeTrialRemaining} posts remaining
+                </p>
+              )}
+            </div>
+            <div>
+              <Button 
+                className="bg-twitter-blue hover:bg-twitter-darkBlue text-white rounded-full button-modern shadow-sm"
+                size="sm"
+                onClick={() => handleGeneratePost(false)}
+              >
+                <Sparkles className="w-4 h-4 mr-2" />
+                Generate
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
-      {showSpecifyForm && <Card className="mb-6 border-twitter-blue/30 shadow-md dark:bg-gray-800 dark:border-twitter-blue/50">
+      {showSpecifyForm && (
+        <Card className="mb-6 border-twitter-blue/30 shadow-md dark:bg-gray-800 dark:border-twitter-blue/50 rounded-xl animate-fade-in card-modern">
           <CardHeader>
-            <CardTitle className="text-lg dark:text-white">Create a Post on a Specific Topic</CardTitle>
+            <CardTitle className="text-lg dark:text-white flex items-center">
+              <MessageCircle className="mr-2 h-5 w-5 text-twitter-blue" />
+              Create a Post on a Specific Topic
+            </CardTitle>
           </CardHeader>
           <form onSubmit={handleSpecificGenerate}>
             <CardContent>
-              <Textarea placeholder="What would you like to post about?" value={specificTopic} onChange={e => setSpecificTopic(e.target.value)} className="resize-none border-twitter-lightGray focus:border-twitter-blue dark:bg-gray-700 dark:border-gray-600 dark:text-white" required />
+              <Textarea 
+                placeholder="What would you like to post about?" 
+                value={specificTopic} 
+                onChange={e => setSpecificTopic(e.target.value)} 
+                className="resize-none border-gray-200 dark:bg-gray-700 dark:border-gray-600 dark:text-white input-modern h-24"
+                required 
+              />
             </CardContent>
-            <CardFooter className="bg-twitter-extraLightGray dark:bg-gray-800 flex justify-between">
-              <Button type="button" variant="ghost" className="dark:text-white dark:hover:bg-gray-700" onClick={() => setShowSpecifyForm(false)}>
+            <CardFooter className="bg-gray-50 dark:bg-gray-800 rounded-b-xl flex justify-between">
+              <Button 
+                type="button" 
+                variant="ghost" 
+                className="dark:text-white dark:hover:bg-gray-700"
+                onClick={() => setShowSpecifyForm(false)}
+              >
                 Cancel
               </Button>
-              <Button type="submit" disabled={!specificTopic.trim() || isGenerating} className="bg-twitter-blue hover:bg-twitter-darkBlue dark:text-white">
+              <Button 
+                type="submit" 
+                disabled={!specificTopic.trim() || isGenerating} 
+                className="bg-twitter-blue hover:bg-twitter-darkBlue dark:text-white button-modern"
+              >
                 {isGenerating ? "Generating..." : "Generate Post"}
               </Button>
             </CardFooter>
           </form>
-        </Card>}
+        </Card>
+      )}
 
-      {isGenerating && postHistory.length === 0 && <div className="flex flex-col items-center justify-center py-10">
-          <div className="animate-pulse flex flex-col items-center">
-            <Sparkles className="h-10 w-10 text-twitter-blue mb-3" />
-            <p className="text-twitter-darkGray dark:text-gray-300">Crafting your perfect tweet...</p>
+      {isGenerating && postHistory.length === 0 && (
+        <div className="flex flex-col items-center justify-center py-16 animate-fade-in">
+          <div className="animate-pulse flex flex-col items-center bg-white dark:bg-gray-800 p-8 rounded-xl shadow-md">
+            <Sparkles className="h-12 w-12 text-twitter-blue mb-4" />
+            <p className="text-twitter-darkGray dark:text-gray-300 font-medium">Crafting your perfect tweet...</p>
           </div>
-        </div>}
+        </div>
+      )}
 
-      {postHistory.length > 0 && <div className="space-y-6">
-          {postHistory.map(post => <GeneratedPost key={post.id} content={post.content} isLoading={false} />)}
-        </div>}
+      {postHistory.length > 0 && (
+        <div className="space-y-6">
+          {postHistory.map((post, index) => (
+            <div 
+              key={post.id} 
+              className="animate-fade-in"
+              style={{ animationDelay: `${index * 0.1}s` }}
+            >
+              <GeneratedPost 
+                content={post.content} 
+                isLoading={false} 
+              />
+            </div>
+          ))}
+        </div>
+      )}
       
       <Dialog open={showApiKeyModal} onOpenChange={setShowApiKeyModal}>
-        <DialogContent className="sm:max-w-md dark:bg-gray-800 dark:border-gray-700">
+        <DialogContent className="sm:max-w-md dark:bg-gray-800 dark:border-gray-700 rounded-xl">
           <DialogHeader>
-            <DialogTitle className="dark:text-white">API Key Required</DialogTitle>
+            <DialogTitle className="dark:text-white flex items-center">
+              <KeyRound className="mr-2 h-5 w-5 text-twitter-blue" />
+              API Key Required
+            </DialogTitle>
             <DialogDescription className="dark:text-gray-300">
               Your free trial has ended. Please enter your Gemini API key to continue generating posts.
             </DialogDescription>
@@ -182,6 +255,8 @@ const PostGenerator = () => {
           </div>
         </DialogContent>
       </Dialog>
-    </div>;
+    </div>
+  );
 };
+
 export default PostGenerator;

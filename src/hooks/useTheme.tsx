@@ -6,8 +6,13 @@ type Theme = "dark" | "light";
 export function useTheme() {
   const [theme, setTheme] = useState<Theme>(() => {
     const savedTheme = localStorage.getItem("theme") as Theme | null;
-    // Always default to dark theme now instead of checking system preference
-    return savedTheme || "dark";
+    
+    // Check for system preference if no saved theme
+    if (!savedTheme) {
+      return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    }
+    
+    return savedTheme;
   });
 
   useEffect(() => {
