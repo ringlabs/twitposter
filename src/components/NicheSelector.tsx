@@ -49,14 +49,14 @@ const NicheSelector = ({ onComplete, inSettings = false }: NicheSelectorProps) =
             <Button
               key={niche.id}
               variant={selectedNiche === niche.id ? "default" : "outline"}
-              className={`h-auto py-2 px-2 flex flex-col items-center justify-center transition-all ${
+              className={`h-auto py-2 px-2 flex flex-col items-center justify-center transition-all min-h-[40px] ${
                 selectedNiche === niche.id 
                   ? "bg-twitter-blue hover:bg-twitter-darkBlue dark:text-white" 
                   : "hover:border-twitter-blue hover:text-twitter-blue dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
               }`}
               onClick={() => handleNicheSelect(niche.id)}
             >
-              <span className="text-center text-sm">{niche.name}</span>
+              <span className="text-center text-sm line-clamp-2 leading-tight">{niche.name}</span>
             </Button>
           ))}
         </div>
@@ -85,14 +85,14 @@ const NicheSelector = ({ onComplete, inSettings = false }: NicheSelectorProps) =
               <Button
                 key={niche.id}
                 variant={selectedNiche === niche.id ? "default" : "outline"}
-                className={`h-auto py-4 px-3 flex flex-col items-center justify-center transition-all ${
+                className={`h-auto py-3 px-2 flex flex-col items-center justify-center transition-all min-h-[56px] ${
                   selectedNiche === niche.id 
                     ? "bg-twitter-blue hover:bg-twitter-darkBlue dark:text-white" 
                     : "hover:border-twitter-blue hover:text-twitter-blue dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
                 }`}
                 onClick={() => handleNicheSelect(niche.id)}
               >
-                <span className="text-center">{niche.name}</span>
+                <span className="text-center line-clamp-2 leading-tight">{niche.name}</span>
               </Button>
             ))}
           </div>

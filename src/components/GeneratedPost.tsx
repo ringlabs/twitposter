@@ -3,8 +3,9 @@ import { useState } from "react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Twitter, Copy, Share, ThumbsUp } from "lucide-react";
+import { Twitter, Copy, Share } from "lucide-react";
 import { postToTwitter } from "@/services/postGeneratorService";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface GeneratedPostProps {
   content: string;
@@ -15,10 +16,9 @@ interface GeneratedPostProps {
 const GeneratedPost = ({
   content,
   onRequestAnother,
-  isLoading
+  isLoading = false
 }: GeneratedPostProps) => {
   const [copied, setCopied] = useState(false);
-  const [liked, setLiked] = useState(false);
   
   const handleCopy = () => {
     navigator.clipboard.writeText(content).then(() => {
@@ -34,13 +34,42 @@ const GeneratedPost = ({
     postToTwitter(content);
     toast.success("Opening Twitter to share your post");
   };
-
-  const handleLike = () => {
-    setLiked(!liked);
-    if (!liked) {
-      toast.success("Post added to favorites");
-    }
-  };
+  
+  if (isLoading) {
+    return (
+      <Card className="w-full border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300 rounded-xl dark:bg-gray-800 card-modern animate-pulse">
+        <CardContent className="p-5">
+          <div className="bg-white dark:bg-gray-900 rounded-xl p-5 border border-gray-100 dark:border-gray-800 min-h-[120px]">
+            {/* Twitter-like skeleton format */}
+            <div className="flex mb-3">
+              <Skeleton className="flex-shrink-0 w-10 h-10 rounded-full" />
+              <div className="ml-3 space-y-2">
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-3 w-24" />
+              </div>
+            </div>
+            
+            <div className="space-y-2 mt-4">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-3/4" />
+            </div>
+            
+            <div className="mt-4">
+              <Skeleton className="h-3 w-32" />
+            </div>
+          </div>
+        </CardContent>
+        
+        <CardFooter className="bg-gray-50 dark:bg-gray-800 rounded-b-xl py-3 px-4 border-t border-gray-100 dark:border-gray-700">
+          <div className="flex gap-2 w-full justify-between">
+            <Skeleton className="h-9 w-20" />
+            <Skeleton className="h-9 w-20" />
+          </div>
+        </CardFooter>
+      </Card>
+    );
+  }
   
   return (
     <Card className="w-full border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300 rounded-xl dark:bg-gray-800 card-modern">
@@ -89,17 +118,6 @@ const GeneratedPost = ({
           >
             Share
             <Twitter className="ml-2 h-4 w-4" />
-          </Button>
-        </div>
-        
-        <div className="flex gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleLike}
-            className={`text-gray-500 hover:text-pink-500 dark:text-gray-400 ${liked ? 'text-pink-500 bg-pink-50 dark:bg-pink-900/20 dark:text-pink-400' : ''}`}
-          >
-            <ThumbsUp className={`h-4 w-4 ${liked ? 'fill-current' : ''}`} />
           </Button>
         </div>
       </CardFooter>

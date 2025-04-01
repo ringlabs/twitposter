@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import TwitterPostGenerator from "./pages/TwitterPostGenerator";
 import { useTheme } from "./hooks/useTheme";
+import { useIsMobile } from "./hooks/use-mobile";
 
 const queryClient = new QueryClient();
 
@@ -15,21 +16,25 @@ const App = () => {
   try {
     // Initialize theme (this will ensure theme is applied immediately)
     const { theme } = useTheme();
+    const isMobile = useIsMobile();
     
     return (
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <Toaster />
           <Sonner 
-            position="top-right"
+            position={isMobile ? "top-center" : "bottom-right"}
             theme={theme as "light" | "dark" | "system"}
             className="sonner-toast-modern"
+            closeButton={!isMobile}
             toastOptions={{
               classNames: {
                 toast: "group toast-modern rounded-lg border-border",
-                description: "text-muted-foreground text-sm",
+                title: "text-foreground text-base font-medium",
+                description: "text-foreground text-sm dark:text-gray-300",
                 actionButton: "bg-primary text-primary-foreground",
                 cancelButton: "bg-muted text-muted-foreground",
+                closeButton: "text-foreground dark:text-white",
                 error: "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-600 dark:text-red-400",
                 success: "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800"
               }
