@@ -53,7 +53,7 @@ const Header = ({
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-full p-0 sm:max-w-md dark:bg-gray-900 dark:border-gray-800 rounded-l-xl">
-              <SheetHeader className="p-2 border-b dark:border-gray-800 flex  sm:flex-row sm:items-center sm:justify-between">
+              <SheetHeader className="p-2 pr-10 border-b dark:border-gray-800 flex-row items-center justify-between">
                 <SheetTitle className="text-xl dark:text-white flex items-center">
                   <Settings className="mr-2 h-5 w-5" />
                   Settings
