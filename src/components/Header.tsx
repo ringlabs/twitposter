@@ -47,7 +47,7 @@ const Header = ({
           
           <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
             <SheetTrigger asChild>
-              <Button variant="outline" size="icon" className="rounded-full border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 button-modern">
+              <Button variant="outline" size="icon" className="rounded-full bg-gray-200 hover:bg-gray-300 dark:bg-gray-800 dark:hover:bg-gray-700 button-modern">
                 <Settings className="h-4 w-4" />
               </Button>
             </SheetTrigger>
