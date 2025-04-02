@@ -90,7 +90,7 @@ const GeneratedPost = ({
       
       <CardFooter className="rounded-b-xl flex flex-wrap gap-2 justify-between py-2 px-2 border-t border-gray-100 dark:border-gray-700 bg-gray-100 dark:bg-gray-800">
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={handleCopy} disabled={copied} className="bg-gray-50 text-gray-600 hover:text-twitter-blue hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:text-white dark:border-gray-600 rounded-lg button-modern">
+          <Button variant="outline" size="sm" onClick={handleCopy} disabled={copied} className="bg-gray-100 text-gray-600 hover:text-twitter-blue hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:text-white dark:border-gray-600 rounded-lg button-modern">
             {copied ? "Copied!" : "Copy"}
             <Copy className="ml-2 h-4 w-4" />
           </Button>
