@@ -1,14 +1,17 @@
+
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp, Image, ExternalLink } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
+
 interface TutorialStep {
   title: string;
   description: string;
   imageAlt: string;
 }
+
 const tutorialSteps: TutorialStep[] = [{
   title: "Create a Google Account",
   description: "If you don't have a Google account, create one. If you already have one, sign in to your account.",
@@ -42,15 +45,18 @@ const tutorialSteps: TutorialStep[] = [{
   description: "Return to the Twitter Post Generator and paste your copied API key into the API key input field.",
   imageAlt: "Twitter Post Generator API key input field"
 }];
+
 interface GoogleApiKeyTutorialProps {
   isExpanded: boolean;
   onToggle: () => void;
 }
+
 const GoogleApiKeyTutorial = ({
   isExpanded,
   onToggle
 }: GoogleApiKeyTutorialProps) => {
   const isMobile = useIsMobile();
+  
   return <div className="mt-4 border-t pt-4 animate-fade-in">
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-sm ms:text-lg text-twitter-blue flex items-center font-medium">
@@ -108,4 +114,5 @@ const GoogleApiKeyTutorial = ({
         </>}
     </div>;
 };
+
 export default GoogleApiKeyTutorial;

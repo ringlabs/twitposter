@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Settings, Moon, Sun, MessageSquare, Sparkles } from "lucide-react";
@@ -9,9 +10,11 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useIsMobile } from "@/hooks/use-mobile";
 import { toast } from "sonner";
 import { ScrollArea } from "@/components/ui/scroll-area";
+
 interface HeaderProps {
   onGeneratePost: (specifyTopic?: boolean) => void;
 }
+
 const Header = ({
   onGeneratePost
 }: HeaderProps) => {
@@ -22,11 +25,13 @@ const Header = ({
   const [sheetOpen, setSheetOpen] = useState(false);
   const [settingsTab, setSettingsTab] = useState<string>("niche");
   const isMobile = useIsMobile();
+
   const toggleTheme = () => {
     setTheme(theme === "dark" ? "light" : "dark");
     toast.success(`Switched to ${theme === "dark" ? "light" : "dark"} mode`);
   };
-  return <div className="w-full border-b border-gray-200 dark:border-gray-800 pb-4 mb-6 pt-4 py-[10px] bg-gray-50 dark:bg-gray-900">
+
+  return <div className="w-full border-b border-gray-200 dark:border-gray-800 pb-4 mb-6 pt-4 py-[10px] bg-gray-50 dark:bg-gray-900 sticky top-0 z-50">
       <div className="flex items-center justify-between px-2">
         <div className="flex items-center">
           <div className="relative mr-2">
@@ -51,7 +56,7 @@ const Header = ({
                 <Settings className="h-4 w-4" />
               </Button>
             </SheetTrigger>
-            <SheetContent className="p-0 sm:max-w-md dark:border-gray-800 bg-gray-50">
+            <SheetContent className="p-0 w-full h-full sm:max-w-md dark:border-gray-800 bg-gray-50">
               <div className="flex flex-col h-full">
                 <SheetHeader className="p-4 border-b dark:border-gray-800">
                   <div className="flex items-center justify-between">
@@ -103,4 +108,5 @@ const Header = ({
       </div>
     </div>;
 };
+
 export default Header;

@@ -27,6 +27,15 @@ const Toaster = ({ ...props }: ToasterProps) => {
           cancelButton: "bg-muted text-muted-foreground",
           closeButton: "text-foreground",
         },
+        // Using slide animations for exit
+        outOfBoundsExit: isMobile ? "slide-up" : "slide-right",
+        dismissExit: isMobile ? "slide-left" : "slide-right",
+        swipeExit: {
+          left: "slide-left",
+          right: "slide-right",
+          up: "slide-up",
+          down: "slide-down",
+        },
       }}
       {...props}
     />

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,9 +7,11 @@ import { KeyRound, Save, ArrowRight, Lock, ShieldAlert, HelpCircle } from "lucid
 import { getFreeTrialUsage, isFreeTrialExhausted, setApiKey } from "@/services/postGeneratorService";
 import { toast } from "sonner";
 import GoogleApiKeyTutorial from "./GoogleApiKeyTutorial";
+
 interface ApiKeyInputProps {
   onComplete: () => void;
 }
+
 const ApiKeyInput = ({
   onComplete
 }: ApiKeyInputProps) => {
@@ -16,6 +19,7 @@ const ApiKeyInput = ({
   const [showTutorial, setShowTutorial] = useState<boolean>(false);
   const freeTrialExhausted = isFreeTrialExhausted();
   const freeTrialRemaining = 5 - getFreeTrialUsage();
+  
   const handleSubmit = () => {
     if (!apiKey.trim()) {
       toast.error("Please enter a valid API key");
@@ -25,10 +29,12 @@ const ApiKeyInput = ({
     toast.success("API key saved successfully!");
     onComplete();
   };
+  
   const handleSkip = () => {
     toast.success(`Starting free trial. You have ${freeTrialRemaining} posts remaining.`);
     onComplete();
   };
+  
   return <div className="container max-w-4xl mx-auto py-6 px-4">
       <Card className="border-twitter-blue shadow-md dark:bg-gray-800 dark:border-twitter-blue/50 overflow-hidden">
         <CardHeader className="bg-twitter-blue text-white">
@@ -85,4 +91,5 @@ const ApiKeyInput = ({
       </Card>
     </div>;
 };
+
 export default ApiKeyInput;
