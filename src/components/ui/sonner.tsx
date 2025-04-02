@@ -16,9 +16,6 @@ const Toaster = ({ ...props }: ToasterProps) => {
       closeButton
       richColors
       expand={false}
-      // For v1.5.0, we need to use directly supported animation properties
-      // Apply different swipe direction based on mobile/desktop
-      swipeDirection={isMobile ? "up" : "right"}
       toastOptions={{
         duration: 4000,
         className: "group",
