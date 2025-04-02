@@ -59,7 +59,7 @@ const Header = ({
                       <Settings className="mr-2 h-5 w-5" />
                       Settings
                     </SheetTitle>
-                    <div className="flex space-x-2">
+                    <div className="flex space-x-2 mr-8">
                       <Button variant={settingsTab === "niche" ? "default" : "outline"} size="sm" onClick={() => setSettingsTab("niche")} className={`rounded-lg ${settingsTab === "niche" ? "bg-twitter-blue text-white" : "dark:border-gray-700 dark:text-gray-300"}`}>
                         Niche
                       </Button>
