@@ -3,9 +3,10 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { KeyRound, Save, ArrowRight, Lock, ShieldAlert } from "lucide-react";
+import { KeyRound, Save, ArrowRight, Lock, ShieldAlert, HelpCircle } from "lucide-react";
 import { getFreeTrialUsage, isFreeTrialExhausted, setApiKey } from "@/services/postGeneratorService";
 import { toast } from "sonner";
+import GoogleApiKeyTutorial from "./GoogleApiKeyTutorial";
 
 interface ApiKeyInputProps {
   onComplete: () => void;
@@ -13,6 +14,7 @@ interface ApiKeyInputProps {
 
 const ApiKeyInput = ({ onComplete }: ApiKeyInputProps) => {
   const [apiKey, setApiKeyState] = useState<string>("");
+  const [showTutorial, setShowTutorial] = useState<boolean>(false);
   const freeTrialExhausted = isFreeTrialExhausted();
   const freeTrialRemaining = 5 - getFreeTrialUsage();
 
@@ -66,6 +68,15 @@ const ApiKeyInput = ({ onComplete }: ApiKeyInputProps) => {
               </span>
             </div>
             
+            <Button 
+              variant="outline" 
+              className="w-full border-twitter-blue/30 text-twitter-blue flex items-center justify-center hover:bg-twitter-blue/10"
+              onClick={() => setShowTutorial(true)}
+            >
+              <HelpCircle className="h-4 w-4 mr-2" />
+              How to get your Gemini API key
+            </Button>
+            
             {!freeTrialExhausted && (
               <div className="flex items-start p-3 border border-amber-200 dark:border-amber-800 rounded-lg bg-amber-50 dark:bg-amber-900/20">
                 <ShieldAlert className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 mr-2 flex-shrink-0" />
@@ -99,6 +110,8 @@ const ApiKeyInput = ({ onComplete }: ApiKeyInputProps) => {
           </Button>
         </CardFooter>
       </Card>
+      
+      <GoogleApiKeyTutorial open={showTutorial} onOpenChange={setShowTutorial} />
     </div>
   );
 };

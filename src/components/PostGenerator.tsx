@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,6 +10,7 @@ import { Sparkles, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import Header from "./Header";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Post {
   id: string;
@@ -39,7 +39,6 @@ const PostGenerator = () => {
   const freeTrialRemaining = 5 - getFreeTrialUsage();
   const userHasApiKey = !!getApiKey();
 
-  // Load post history from localStorage on component mount
   useEffect(() => {
     const savedPosts = localStorage.getItem(POSTS_STORAGE_KEY);
     if (savedPosts) {
@@ -52,7 +51,6 @@ const PostGenerator = () => {
     }
   }, []);
 
-  // Save post history to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem(POSTS_STORAGE_KEY, JSON.stringify(postHistory));
   }, [postHistory]);
@@ -70,7 +68,6 @@ const PostGenerator = () => {
 
   const handleAutoGenerate = async () => {
     if (!userHasApiKey && !hasFreeTrialPosts) {
-      // Instead of showing dialog, we'll redirect to initial API key setup screen
       window.location.reload();
       return;
     }
@@ -86,7 +83,6 @@ const PostGenerator = () => {
     } catch (error) {
       console.error("Error generating post:", error);
       if (error instanceof Error && error.message === "Free trial exhausted. Please enter your API key.") {
-        // Redirect to API key setup instead of showing dialog
         window.location.reload();
       } else {
         toast.error("Failed to generate post");
@@ -99,7 +95,6 @@ const PostGenerator = () => {
   const handleSpecificGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!userHasApiKey && !hasFreeTrialPosts) {
-      // Redirect to API key setup instead of showing dialog
       window.location.reload();
       return;
     }
@@ -117,7 +112,6 @@ const PostGenerator = () => {
     } catch (error) {
       console.error("Error generating post:", error);
       if (error instanceof Error && error.message === "Free trial exhausted. Please enter your API key.") {
-        // Redirect to API key setup instead of showing dialog
         window.location.reload();
       } else {
         toast.error("Failed to generate post");
@@ -183,9 +177,27 @@ const PostGenerator = () => {
           </form>
         </Card>}
 
-      {/* Show skeleton when generating and no posts exist */}
       {isGenerating && <div className="mb-6 animate-fade-in">
-          <GeneratedPost content="" isLoading={true} />
+          <Card className="overflow-hidden border border-gray-200 dark:border-gray-700 shadow-sm">
+            <CardHeader className="pb-0">
+              <Skeleton noPulse className="h-6 w-1/3 mb-2" />
+              <Skeleton noPulse className="h-4 w-2/3" />
+            </CardHeader>
+            <CardContent className="pt-4">
+              <div className="space-y-2">
+                <Skeleton noPulse className="h-4 w-full" />
+                <Skeleton noPulse className="h-4 w-full" />
+                <Skeleton noPulse className="h-4 w-5/6" />
+                <Skeleton noPulse className="h-4 w-4/6" />
+              </div>
+            </CardContent>
+            <CardFooter className="border-t bg-gray-50 dark:bg-gray-800 dark:border-gray-700 pt-3">
+              <div className="flex justify-between w-full">
+                <Skeleton noPulse className="h-9 w-24" />
+                <Skeleton noPulse className="h-9 w-24" />
+              </div>
+            </CardFooter>
+          </Card>
         </div>}
 
       {postHistory.length > 0 && <div className="space-y-6">
