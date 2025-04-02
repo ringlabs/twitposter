@@ -1,15 +1,7 @@
 
 import React from "react";
-import { 
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle
-} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Image, ExternalLink } from "lucide-react";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { ChevronDown, ChevronUp, Image, ExternalLink } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -64,131 +56,88 @@ const tutorialSteps: TutorialStep[] = [
 ];
 
 interface GoogleApiKeyTutorialProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  isExpanded: boolean;
+  onToggle: () => void;
 }
 
-const GoogleApiKeyTutorial = ({ open, onOpenChange }: GoogleApiKeyTutorialProps) => {
-  const [currentStep, setCurrentStep] = React.useState(0);
+const GoogleApiKeyTutorial = ({ isExpanded, onToggle }: GoogleApiKeyTutorialProps) => {
   const isMobile = useIsMobile();
   
-  const nextStep = () => {
-    if (currentStep < tutorialSteps.length - 1) {
-      setCurrentStep(currentStep + 1);
-    }
-  };
-  
-  const prevStep = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
-    }
-  };
-
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={cn(
-        "w-full max-w-[90vw] md:max-w-[800px] p-0 h-[85vh] md:h-auto flex flex-col",
-        "overflow-hidden"
-      )}>
-        <DialogHeader className="p-4 md:p-6 border-b">
-          <DialogTitle className="text-xl md:text-2xl flex items-center text-twitter-blue">
-            How to Get Your Gemini API Key
-          </DialogTitle>
-          <DialogDescription>
+    <div className="mt-4 border-t pt-4 animate-fade-in">
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-lg font-semibold text-twitter-blue flex items-center">
+          How to Get Your Gemini API Key
+        </h3>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-twitter-blue hover:bg-twitter-blue/10"
+          onClick={onToggle}
+        >
+          {isExpanded ? (
+            <>
+              <ChevronUp className="h-4 w-4 mr-1" />
+              Hide Steps
+            </>
+          ) : (
+            <>
+              <ChevronDown className="h-4 w-4 mr-1" />
+              Show Steps
+            </>
+          )}
+        </Button>
+      </div>
+      
+      {isExpanded && (
+        <>
+          <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
             Follow these step-by-step instructions to obtain your API key from Google AI Studio
-          </DialogDescription>
-        </DialogHeader>
-
-        {/* Desktop version - Carousel */}
-        <div className="hidden md:block flex-grow overflow-hidden">
-          <Carousel orientation="horizontal" className="w-full">
-            <CarouselContent>
-              {tutorialSteps.map((step, index) => (
-                <CarouselItem key={index}>
-                  <div className="p-6">
-                    <div className="mb-6">
-                      <h3 className="text-lg font-semibold mb-2">
-                        Step {index + 1}: {step.title}
-                      </h3>
+          </p>
+          
+          <div className="space-y-4 mb-4">
+            {tutorialSteps.map((step, index) => (
+              <Card key={index} className="border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+                <CardContent className="p-4">
+                  <div className="flex flex-col md:flex-row gap-4">
+                    <div className="relative overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800 
+                                  md:w-1/3 h-40 flex items-center justify-center border border-gray-200 dark:border-gray-700">
+                      <Image className="w-10 h-10 text-gray-400" />
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 text-center px-4">
+                        {step.imageAlt}
+                      </p>
+                    </div>
+                    
+                    <div className="md:w-2/3 flex flex-col">
+                      <div className="mb-2 flex items-center">
+                        <span className="bg-twitter-blue text-white rounded-full w-6 h-6 inline-flex items-center justify-center mr-2 text-sm">
+                          {index + 1}
+                        </span>
+                        <h4 className="text-lg font-medium">{step.title}</h4>
+                      </div>
                       <p className="text-gray-600 dark:text-gray-300">
                         {step.description}
                       </p>
                     </div>
-                    <div className="relative overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800 h-64 flex items-center justify-center border border-gray-200 dark:border-gray-700">
-                      <Image className="w-12 h-12 text-gray-400" />
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                        Image placeholder for: {step.imageAlt}
-                      </p>
-                    </div>
                   </div>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselPrevious className="left-2" />
-            <CarouselNext className="right-2" />
-          </Carousel>
-        </div>
-
-        {/* Mobile version - Step by step card */}
-        <div className="md:hidden flex-grow overflow-auto p-4">
-          <Card className="border shadow-sm">
-            <CardContent className="p-4 pt-6">
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold mb-2 flex items-center">
-                  <span className="bg-twitter-blue text-white rounded-full w-6 h-6 inline-flex items-center justify-center mr-2 text-sm">
-                    {currentStep + 1}
-                  </span>
-                  {tutorialSteps[currentStep].title}
-                </h3>
-                <p className="text-gray-600 dark:text-gray-300">
-                  {tutorialSteps[currentStep].description}
-                </p>
-              </div>
-              <div className="relative overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800 h-48 flex flex-col items-center justify-center border border-gray-200 dark:border-gray-700">
-                <Image className="w-10 h-10 text-gray-400" />
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 text-center px-4">
-                  {tutorialSteps[currentStep].imageAlt}
-                </p>
-              </div>
-              <div className="flex justify-between mt-6">
-                <Button 
-                  variant="outline" 
-                  onClick={prevStep} 
-                  disabled={currentStep === 0}
-                  className="text-twitter-blue border-twitter-blue hover:bg-twitter-blue/10"
-                >
-                  <ChevronLeft className="mr-1 h-4 w-4" />
-                  Previous
-                </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={nextStep} 
-                  disabled={currentStep === tutorialSteps.length - 1}
-                  className="text-twitter-blue border-twitter-blue hover:bg-twitter-blue/10"
-                >
-                  Next
-                  <ChevronRight className="ml-1 h-4 w-4" />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="p-4 border-t flex justify-between items-center">
-          <div className="text-sm text-gray-500 dark:text-gray-400">
-            {isMobile ? `Step ${currentStep + 1} of ${tutorialSteps.length}` : ""}
+                </CardContent>
+              </Card>
+            ))}
           </div>
-          <Button 
-            variant="outline" 
-            className="ml-auto"
-            onClick={() => window.open("https://ai.google.dev/", "_blank")}
-          >
-            Visit Google AI Studio
-            <ExternalLink className="ml-1 h-4 w-4" />
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+          
+          <div className="flex justify-end">
+            <Button 
+              variant="outline" 
+              className="text-twitter-blue border-twitter-blue hover:bg-twitter-blue/10"
+              onClick={() => window.open("https://ai.google.dev/", "_blank")}
+            >
+              Visit Google AI Studio
+              <ExternalLink className="ml-1 h-4 w-4" />
+            </Button>
+          </div>
+        </>
+      )}
+    </div>
   );
 };
 

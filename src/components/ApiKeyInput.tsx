@@ -71,10 +71,10 @@ const ApiKeyInput = ({ onComplete }: ApiKeyInputProps) => {
             <Button 
               variant="outline" 
               className="w-full border-twitter-blue/30 text-twitter-blue flex items-center justify-center hover:bg-twitter-blue/10"
-              onClick={() => setShowTutorial(true)}
+              onClick={() => setShowTutorial(!showTutorial)}
             >
               <HelpCircle className="h-4 w-4 mr-2" />
-              How to get your Gemini API key
+              {showTutorial ? "Hide API key instructions" : "How to get your Gemini API key"}
             </Button>
             
             {!freeTrialExhausted && (
@@ -87,6 +87,8 @@ const ApiKeyInput = ({ onComplete }: ApiKeyInputProps) => {
               </div>
             )}
           </div>
+          
+          <GoogleApiKeyTutorial isExpanded={showTutorial} onToggle={() => setShowTutorial(!showTutorial)} />
         </CardContent>
         <CardFooter className="flex justify-between bg-gray-50 dark:bg-gray-800 dark:border-t dark:border-gray-700 p-4">
           {!freeTrialExhausted && (
@@ -110,8 +112,6 @@ const ApiKeyInput = ({ onComplete }: ApiKeyInputProps) => {
           </Button>
         </CardFooter>
       </Card>
-      
-      <GoogleApiKeyTutorial open={showTutorial} onOpenChange={setShowTutorial} />
     </div>
   );
 };
