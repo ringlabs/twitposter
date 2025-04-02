@@ -26,7 +26,7 @@ const Header = ({
     setTheme(theme === "dark" ? "light" : "dark");
     toast.success(`Switched to ${theme === "dark" ? "light" : "dark"} mode`);
   };
-  return <div className="w-full border border-gray-200 dark:border-gray-800 pb-4 mb-6 pt-4 bg-gray-50 dark:bg-gray-900 sticky top-0 z-50 py-[15px] pb-2 rounded-b-md">
+  return <div className="w-full border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 sticky top-0 z-50 py-4 pb-1.5 rounded-b-lg">
       <div className="flex items-center justify-between px-2">
         <div className="flex items-center">
           <div className="relative mr-2">
