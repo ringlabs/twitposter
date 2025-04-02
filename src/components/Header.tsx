@@ -51,7 +51,7 @@ const Header = ({
                 <Settings className="h-4 w-4" />
               </Button>
             </SheetTrigger>
-            <SheetContent className="p-0 sm:max-w-md dark:border-gray-800 pr-7 bg-gray-50">
+            <SheetContent className="p-0 sm:max-w-md dark:border-gray-800 bg-gray-50">
               <div className="flex flex-col h-full">
                 <SheetHeader className="p-4 border-b dark:border-gray-800">
                   <div className="flex items-center justify-between">
