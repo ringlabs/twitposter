@@ -116,7 +116,7 @@ const PostGenerator = () => {
     }
   };
   return <div className="w-full max-w-2xl mx-auto md:px-0 px-2">
-      <div className="sticky top-0 bg-transparent z-10 pb-2">
+      <div className="sticky top-0 bg-transparent z-10 pb-2 w-full">
         <Header onGeneratePost={handleGeneratePost} />
       </div>
       
