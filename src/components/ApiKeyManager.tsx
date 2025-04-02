@@ -4,18 +4,31 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { getApiKey, setApiKey, clearApiKey } from "@/services/postGeneratorService";
-import { KeyRound, Save, X, Info, ShieldCheck, ShieldAlert } from "lucide-react";
+import { KeyRound, Save, X, Info, ShieldCheck, ShieldAlert, Trash2 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
+import { LOCAL_STORAGE_NICHE_KEY } from "@/constants/niches";
 
 const ApiKeyManager = () => {
   const [apiKey, setApiKeyState] = useState<string>("");
   const [saved, setSaved] = useState<boolean>(false);
   const [hasKey, setHasKey] = useState<boolean>(false);
+  const [isInIframe, setIsInIframe] = useState<boolean>(false);
   
   useEffect(() => {
     const key = getApiKey();
     setHasKey(!!key);
+  }, []);
+
+  useEffect(() => {
+    // Check if page is in an iframe or being rendered by puppeteer
+    try {
+      const isIframe = window.self !== window.top;
+      const isPuppeteer = navigator.userAgent.includes('puppeteer');
+      setIsInIframe(isIframe || isPuppeteer);
+    } catch (e) {
+      setIsInIframe(true);
+    }
   }, []);
 
   const handleSaveKey = () => {
@@ -33,6 +46,23 @@ const ApiKeyManager = () => {
     setApiKeyState("");
     setHasKey(false);
     toast.info("API key removed");
+  };
+
+  const handleDeleteAllData = () => {
+    // Clear all app data from localStorage
+    clearApiKey();
+    localStorage.removeItem(LOCAL_STORAGE_NICHE_KEY);
+    localStorage.removeItem("twitter_generated_posts");
+    localStorage.removeItem("free_trial_usage");
+    
+    setApiKeyState("");
+    setHasKey(false);
+    toast.success("All data has been deleted");
+    
+    // Reload the page to reset the app state
+    setTimeout(() => {
+      window.location.href = "/";
+    }, 1500);
   };
 
   return (
@@ -106,6 +136,23 @@ const ApiKeyManager = () => {
             )}
           </div>
         </div>
+        
+        {isInIframe && (
+          <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <Button
+              variant="destructive"
+              onClick={handleDeleteAllData}
+              className="w-full"
+              size="sm"
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete All App Data
+            </Button>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+              This will remove all saved data including API key, niche settings, and generated posts.
+            </p>
+          </div>
+        )}
       </CardContent>
       <CardFooter className={`text-sm p-3 ${hasKey ? 'bg-green-50 dark:bg-green-900/10 text-green-700 dark:text-green-400' : 'bg-amber-50 dark:bg-amber-900/10 text-amber-700 dark:text-amber-400'}`}>
         {hasKey ? (
