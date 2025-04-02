@@ -115,7 +115,7 @@ const PostGenerator = () => {
       handleAutoGenerate();
     }
   };
-  return <div className="w-full max-w-2xl mx-auto md:px-0 px-2">
+  return <div className="w-full max-w-2xl mx-auto p-0">
       <div className="sticky top-0 bg-transparent z-10 pb-2 w-full">
         <Header onGeneratePost={handleGeneratePost} />
       </div>
@@ -185,7 +185,7 @@ const PostGenerator = () => {
           </Card>
         </div>}
 
-      {postHistory.length > 0 && <div className="space-y-6">
+      {postHistory.length > 0 && <div className="space-y-6 px-2">
           {postHistory.map((post, index) => <div key={post.id} className="animate-fade-in" style={{
         animationDelay: `${index * 0.1}s`
       }}>
