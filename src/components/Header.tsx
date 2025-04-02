@@ -56,7 +56,7 @@ const Header = ({
                 <SheetHeader className="p-4 border-b dark:border-gray-800">
                   <div className="flex items-center justify-between">
                     <SheetTitle className="text-xl dark:text-white flex items-center">
-                      <Settings className="mr-2 h-5 w-5" />
+                      <Settings className="mr-40 h-5 w-5" />
                       Settings
                     </SheetTitle>
                     <div className="flex space-x-2">
