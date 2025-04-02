@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Settings, Moon, Sun, MessageSquare, Sparkles } from "lucide-react";
@@ -10,27 +9,25 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useIsMobile } from "@/hooks/use-mobile";
 import { toast } from "sonner";
 import { ScrollArea } from "@/components/ui/scroll-area";
-
 interface HeaderProps {
   onGeneratePost: (specifyTopic?: boolean) => void;
 }
-
 const Header = ({
   onGeneratePost
 }: HeaderProps) => {
-  const { theme, setTheme } = useTheme();
+  const {
+    theme,
+    setTheme
+  } = useTheme();
   const [sheetOpen, setSheetOpen] = useState(false);
   const [settingsTab, setSettingsTab] = useState<string>("niche");
   const isMobile = useIsMobile();
-  
   const toggleTheme = () => {
     setTheme(theme === "dark" ? "light" : "dark");
     toast.success(`Switched to ${theme === "dark" ? "light" : "dark"} mode`);
   };
-  
-  return (
-    <div className="w-full border-b border-gray-200 dark:border-gray-800 pb-4 mb-6 pt-4 py-[10px]">
-      <div className="flex items-center justify-between">
+  return <div className="w-full border-b border-gray-200 dark:border-gray-800 pb-4 mb-6 pt-4 py-[10px] bg-gray-50 dark:bg-gray-900">
+      <div className="flex items-center justify-between px-2">
         <div className="flex items-center">
           <div className="relative mr-2">
             <div className="w-10 h-10 bg-twitter-blue rounded-full flex items-center justify-center shadow-md">
@@ -63,20 +60,10 @@ const Header = ({
                       Settings
                     </SheetTitle>
                     <div className="flex space-x-2">
-                      <Button 
-                        variant={settingsTab === "niche" ? "default" : "outline"} 
-                        size="sm" 
-                        onClick={() => setSettingsTab("niche")} 
-                        className={`rounded-lg ${settingsTab === "niche" ? "bg-twitter-blue text-white" : "dark:border-gray-700 dark:text-gray-300"}`}
-                      >
+                      <Button variant={settingsTab === "niche" ? "default" : "outline"} size="sm" onClick={() => setSettingsTab("niche")} className={`rounded-lg ${settingsTab === "niche" ? "bg-twitter-blue text-white" : "dark:border-gray-700 dark:text-gray-300"}`}>
                         Niche
                       </Button>
-                      <Button 
-                        variant={settingsTab === "api-key" ? "default" : "outline"} 
-                        size="sm" 
-                        onClick={() => setSettingsTab("api-key")} 
-                        className={`rounded-lg ${settingsTab === "api-key" ? "bg-twitter-blue text-white" : "dark:border-gray-700 dark:text-gray-300"}`}
-                      >
+                      <Button variant={settingsTab === "api-key" ? "default" : "outline"} size="sm" onClick={() => setSettingsTab("api-key")} className={`rounded-lg ${settingsTab === "api-key" ? "bg-twitter-blue text-white" : "dark:border-gray-700 dark:text-gray-300"}`}>
                         API Key
                       </Button>
                     </div>
@@ -114,8 +101,6 @@ const Header = ({
           </DropdownMenu>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default Header;
