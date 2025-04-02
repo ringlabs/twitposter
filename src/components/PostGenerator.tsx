@@ -121,7 +121,7 @@ const PostGenerator = () => {
       </div>
       
       {!isMobile && <div className="animate-fade-in">
-          <div className="flex items-center mb-6 bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-100 dark:border-gray-700">
+          <div className="flex items-center mb-6 bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-100 dark:border-gray-700 mx-[16px]">
             <div className="flex-1">
               <p className="text-twitter-darkGray dark:text-gray-300 mb-1">
                 Currently generating posts for <span className="font-medium text-twitter-blue">{selectedNiche.name}</span>
@@ -185,7 +185,7 @@ const PostGenerator = () => {
           </Card>
         </div>}
 
-      {postHistory.length > 0 && <div className="space-y-6 px-2">
+      {postHistory.length > 0 && <div className="space-y-6 px-4\n">
           {postHistory.map((post, index) => <div key={post.id} className="animate-fade-in" style={{
         animationDelay: `${index * 0.1}s`
       }}>
