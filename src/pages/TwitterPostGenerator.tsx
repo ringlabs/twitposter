@@ -47,7 +47,7 @@ const TwitterPostGenerator = () => {
   }
 
   // First show niche selector, then API key input (if needed), then the post generator
-  return <div className="min-h-screen bg-gradient-to-br from-white to-twitter-extraLightGray dark:from-gray-900 dark:to-gray-500 transition-colors duration-300">
+  return <div className="min-h-screen bg-gradient-to-br from-white to-gray-400 dark:from-gray-950 dark:to-gray-800 transition-colors duration-300">
       <div className="container max-w-4xl mx-auto py-6 md:px-0 px-0">
         {!hasSelectedNiche ? <div className="animate-fade-in">
             <NicheSelector onComplete={handleNicheSelectionComplete} />
