@@ -26,7 +26,7 @@ const Header = ({
     setTheme(theme === "dark" ? "light" : "dark");
     toast.success(`Switched to ${theme === "dark" ? "light" : "dark"} mode`);
   };
-  return <div className="w-full border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 sticky top-0 z-50 py-4 pb-1.5 rounded-b-lg">
+  return <div className="w-full border border-gray-200 dark:border-gray-800 sticky top-0 z-50 py-4 pb-1.5 rounded-b-lg bg-gray-200">
       <div className="flex items-center justify-between px-2">
         <div className="flex items-center">
           <div className="relative mr-2">
@@ -47,7 +47,7 @@ const Header = ({
           
           <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
             <SheetTrigger asChild>
-              <Button variant="outline" size="icon" className="rounded-full border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 button-modern">
+              <Button variant="outline" size="icon" className="rounded-full border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 button-modern">
                 <Settings className="h-4 w-4" />
               </Button>
             </SheetTrigger>
