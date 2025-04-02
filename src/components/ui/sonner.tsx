@@ -16,6 +16,9 @@ const Toaster = ({ ...props }: ToasterProps) => {
       closeButton
       richColors
       expand={false}
+      // For v1.5.0, we need to use directly supported animation properties
+      // Apply different swipe direction based on mobile/desktop
+      swipeDirection={isMobile ? "up" : "right"}
       toastOptions={{
         duration: 4000,
         className: "group",
@@ -27,20 +30,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
           cancelButton: "bg-muted text-muted-foreground",
           closeButton: "text-foreground",
         },
-        // Using custom exit animations
         descriptionClassName: "text-foreground text-sm",
-        exitAnimation: isMobile ? "slide-up" : "slide-right",
-        customAnimation: {
-          enter: {
-            opacity: [0, 1],
-            transform: ["translateX(8px)", "translateX(0)"]
-          },
-          exit: {
-            opacity: [1, 0],
-            transform: ["translateX(0)", isMobile ? "translateY(-8px)" : "translateX(8px)"]
-          }
-        },
-        swipeDirection: isMobile ? "up" : "right",
       }}
       {...props}
     />
