@@ -11,7 +11,6 @@ import { toast } from "sonner";
 import Header from "./Header";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Skeleton } from "@/components/ui/skeleton";
-
 interface Post {
   id: string;
   content: string;
@@ -19,26 +18,21 @@ interface Post {
   nicheId: string;
   topic?: string;
 }
-
 const POSTS_STORAGE_KEY = "twitter_generated_posts";
-
 const PostGenerator = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [showSpecifyForm, setShowSpecifyForm] = useState(false);
   const [specificTopic, setSpecificTopic] = useState("");
   const [postHistory, setPostHistory] = useState<Post[]>([]);
   const isMobile = useIsMobile();
-  
   const selectedNicheId = localStorage.getItem(LOCAL_STORAGE_NICHE_KEY) || "general";
   const selectedNiche = NICHES.find(niche => niche.id === selectedNicheId) || {
     id: "general",
     name: "General"
   };
-  
   const hasFreeTrialPosts = !isFreeTrialExhausted();
   const freeTrialRemaining = 5 - getFreeTrialUsage();
   const userHasApiKey = !!getApiKey();
-
   useEffect(() => {
     const savedPosts = localStorage.getItem(POSTS_STORAGE_KEY);
     if (savedPosts) {
@@ -50,11 +44,9 @@ const PostGenerator = () => {
       }
     }
   }, []);
-
   useEffect(() => {
     localStorage.setItem(POSTS_STORAGE_KEY, JSON.stringify(postHistory));
   }, [postHistory]);
-
   const addPostToHistory = (content: string, topic?: string) => {
     const newPost: Post = {
       id: Date.now().toString(),
@@ -65,13 +57,11 @@ const PostGenerator = () => {
     };
     setPostHistory(prevPosts => [newPost, ...prevPosts]);
   };
-
   const handleAutoGenerate = async () => {
     if (!userHasApiKey && !hasFreeTrialPosts) {
       window.location.reload();
       return;
     }
-    
     setIsGenerating(true);
     try {
       const post = await generatePost(selectedNicheId);
@@ -91,14 +81,12 @@ const PostGenerator = () => {
       setIsGenerating(false);
     }
   };
-
   const handleSpecificGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!userHasApiKey && !hasFreeTrialPosts) {
       window.location.reload();
       return;
     }
-    
     setIsGenerating(true);
     setShowSpecifyForm(false);
     try {
@@ -120,7 +108,6 @@ const PostGenerator = () => {
       setIsGenerating(false);
     }
   };
-
   const handleGeneratePost = (specifyTopic = false) => {
     if (specifyTopic) {
       setShowSpecifyForm(true);
@@ -128,10 +115,8 @@ const PostGenerator = () => {
       handleAutoGenerate();
     }
   };
-
-  return (
-    <div className="w-full max-w-2xl mx-auto md:px-0 px-2">
-      <div className="sticky top-0 bg-white dark:bg-gray-900 z-10 pb-2">
+  return <div className="w-full max-w-2xl mx-auto md:px-0 px-2">
+      <div className="sticky top-0 bg-white dark:bg-gray-900 z-10 h-0">
         <Header onGeneratePost={handleGeneratePost} />
       </div>
       
@@ -207,8 +192,6 @@ const PostGenerator = () => {
               <GeneratedPost content={post.content} isLoading={false} />
             </div>)}
         </div>}
-    </div>
-  );
+    </div>;
 };
-
 export default PostGenerator;
