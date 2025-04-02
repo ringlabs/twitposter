@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Settings, Moon, Sun, MessageSquare, Sparkles } from "lucide-react";
@@ -5,29 +6,30 @@ import { useTheme } from "@/hooks/useTheme";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import ApiKeyManager from "./ApiKeyManager";
 import NicheSelector from "./NicheSelector";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { toast } from "sonner";
 import { ScrollArea } from "@/components/ui/scroll-area";
+
 interface HeaderProps {
   onGeneratePost: (specifyTopic?: boolean) => void;
 }
+
 const Header = ({
   onGeneratePost
 }: HeaderProps) => {
-  const {
-    theme,
-    setTheme
-  } = useTheme();
+  const { theme, setTheme } = useTheme();
   const [sheetOpen, setSheetOpen] = useState(false);
   const [settingsTab, setSettingsTab] = useState<string>("niche");
   const isMobile = useIsMobile();
+  
   const toggleTheme = () => {
     setTheme(theme === "dark" ? "light" : "dark");
     toast.success(`Switched to ${theme === "dark" ? "light" : "dark"} mode`);
   };
-  return <div className="w-full border-b border-gray-200 dark:border-gray-800 pb-4 mb-6 pt-4 py-[10px]">
+  
+  return (
+    <div className="w-full border-b border-gray-200 dark:border-gray-800 pb-4 mb-6 pt-4 py-[10px]">
       <div className="flex items-center justify-between">
         <div className="flex items-center">
           <div className="relative mr-2">
@@ -52,31 +54,43 @@ const Header = ({
                 <Settings className="h-4 w-4" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-full p-0 sm:max-w-md dark:bg-gray-900 dark:border-gray-800 rounded-l-xl">
-              <SheetHeader className="p-2 pr-10 border-b dark:border-gray-800 flex-row items-center justify-between">
-                <SheetTitle className="text-xl dark:text-white flex items-center">
-                  <Settings className="mr-2 h-5 w-5" />
-                  Settings
-                </SheetTitle>
-                <div className="flex mt-4 sm:mt-0 space-x-2">
-                  <Button variant={settingsTab === "niche" ? "default" : "outline"} size="sm" onClick={() => setSettingsTab("niche")} className={`rounded-lg ${settingsTab === "niche" ? "bg-twitter-blue text-white" : "dark:border-gray-700 dark:text-gray-300"}`}>
-                    Niche
-                  </Button>
-                  <Button variant={settingsTab === "api-key" ? "default" : "outline"} size="sm" onClick={() => setSettingsTab("api-key")} className={`rounded-lg ${settingsTab === "api-key" ? "bg-twitter-blue text-white" : "dark:border-gray-700 dark:text-gray-300"}`}>
-                    API Key
-                  </Button>
-                </div>
-              </SheetHeader>
-              <ScrollArea className="h-[calc(100vh-130px)]">
-                <div className="p-2">
+            <SheetContent className="p-0 sm:max-w-md dark:bg-gray-900 dark:border-gray-800">
+              <div className="flex flex-col h-full">
+                <SheetHeader className="p-4 border-b dark:border-gray-800">
+                  <div className="flex items-center justify-between">
+                    <SheetTitle className="text-xl dark:text-white flex items-center">
+                      <Settings className="mr-2 h-5 w-5" />
+                      Settings
+                    </SheetTitle>
+                    <div className="flex space-x-2">
+                      <Button 
+                        variant={settingsTab === "niche" ? "default" : "outline"} 
+                        size="sm" 
+                        onClick={() => setSettingsTab("niche")} 
+                        className={`rounded-lg ${settingsTab === "niche" ? "bg-twitter-blue text-white" : "dark:border-gray-700 dark:text-gray-300"}`}
+                      >
+                        Niche
+                      </Button>
+                      <Button 
+                        variant={settingsTab === "api-key" ? "default" : "outline"} 
+                        size="sm" 
+                        onClick={() => setSettingsTab("api-key")} 
+                        className={`rounded-lg ${settingsTab === "api-key" ? "bg-twitter-blue text-white" : "dark:border-gray-700 dark:text-gray-300"}`}
+                      >
+                        API Key
+                      </Button>
+                    </div>
+                  </div>
+                </SheetHeader>
+                <ScrollArea className="flex-1 p-4">
                   {settingsTab === "niche" && <div className="animate-fade-in">
-                      <NicheSelector onComplete={() => setSheetOpen(false)} inSettings={true} />
-                    </div>}
+                    <NicheSelector onComplete={() => setSheetOpen(false)} inSettings={true} />
+                  </div>}
                   {settingsTab === "api-key" && <div className="animate-fade-in">
-                      <ApiKeyManager />
-                    </div>}
-                </div>
-              </ScrollArea>
+                    <ApiKeyManager />
+                  </div>}
+                </ScrollArea>
+              </div>
             </SheetContent>
           </Sheet>
           
@@ -100,6 +114,8 @@ const Header = ({
           </DropdownMenu>
         </div>
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default Header;

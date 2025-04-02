@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -6,12 +7,11 @@ import { LOCAL_STORAGE_NICHE_KEY } from "@/constants/niches";
 import { generatePost, isFreeTrialExhausted, getFreeTrialUsage, getApiKey } from "@/services/postGeneratorService";
 import GeneratedPost from "./GeneratedPost";
 import { NICHES } from "@/constants/niches";
-import { Sparkles, Pencil, KeyRound, MessageCircle } from "lucide-react";
+import { Sparkles, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import Header from "./Header";
 import { useIsMobile } from "@/hooks/use-mobile";
-import ApiKeyInput from "./ApiKeyInput";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+
 interface Post {
   id: string;
   content: string;
@@ -19,19 +19,22 @@ interface Post {
   nicheId: string;
   topic?: string;
 }
+
 const POSTS_STORAGE_KEY = "twitter_generated_posts";
+
 const PostGenerator = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [showSpecifyForm, setShowSpecifyForm] = useState(false);
   const [specificTopic, setSpecificTopic] = useState("");
   const [postHistory, setPostHistory] = useState<Post[]>([]);
-  const [showApiKeyModal, setShowApiKeyModal] = useState(false);
   const isMobile = useIsMobile();
+  
   const selectedNicheId = localStorage.getItem(LOCAL_STORAGE_NICHE_KEY) || "general";
   const selectedNiche = NICHES.find(niche => niche.id === selectedNicheId) || {
     id: "general",
     name: "General"
   };
+  
   const hasFreeTrialPosts = !isFreeTrialExhausted();
   const freeTrialRemaining = 5 - getFreeTrialUsage();
   const userHasApiKey = !!getApiKey();
@@ -53,6 +56,7 @@ const PostGenerator = () => {
   useEffect(() => {
     localStorage.setItem(POSTS_STORAGE_KEY, JSON.stringify(postHistory));
   }, [postHistory]);
+
   const addPostToHistory = (content: string, topic?: string) => {
     const newPost: Post = {
       id: Date.now().toString(),
@@ -63,11 +67,14 @@ const PostGenerator = () => {
     };
     setPostHistory(prevPosts => [newPost, ...prevPosts]);
   };
+
   const handleAutoGenerate = async () => {
     if (!userHasApiKey && !hasFreeTrialPosts) {
-      setShowApiKeyModal(true);
+      // Instead of showing dialog, we'll redirect to initial API key setup screen
+      window.location.reload();
       return;
     }
+    
     setIsGenerating(true);
     try {
       const post = await generatePost(selectedNicheId);
@@ -79,7 +86,8 @@ const PostGenerator = () => {
     } catch (error) {
       console.error("Error generating post:", error);
       if (error instanceof Error && error.message === "Free trial exhausted. Please enter your API key.") {
-        setShowApiKeyModal(true);
+        // Redirect to API key setup instead of showing dialog
+        window.location.reload();
       } else {
         toast.error("Failed to generate post");
       }
@@ -87,12 +95,15 @@ const PostGenerator = () => {
       setIsGenerating(false);
     }
   };
+
   const handleSpecificGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!userHasApiKey && !hasFreeTrialPosts) {
-      setShowApiKeyModal(true);
+      // Redirect to API key setup instead of showing dialog
+      window.location.reload();
       return;
     }
+    
     setIsGenerating(true);
     setShowSpecifyForm(false);
     try {
@@ -106,7 +117,8 @@ const PostGenerator = () => {
     } catch (error) {
       console.error("Error generating post:", error);
       if (error instanceof Error && error.message === "Free trial exhausted. Please enter your API key.") {
-        setShowApiKeyModal(true);
+        // Redirect to API key setup instead of showing dialog
+        window.location.reload();
       } else {
         toast.error("Failed to generate post");
       }
@@ -114,6 +126,7 @@ const PostGenerator = () => {
       setIsGenerating(false);
     }
   };
+
   const handleGeneratePost = (specifyTopic = false) => {
     if (specifyTopic) {
       setShowSpecifyForm(true);
@@ -121,11 +134,12 @@ const PostGenerator = () => {
       handleAutoGenerate();
     }
   };
-  const handleApiKeySetup = () => {
-    setShowApiKeyModal(false);
-  };
-  return <div className="w-full max-w-2xl mx-auto md:px-0 px-2">
-      <Header onGeneratePost={handleGeneratePost} />
+
+  return (
+    <div className="w-full max-w-2xl mx-auto md:px-0 px-2">
+      <div className="sticky top-0 bg-white dark:bg-gray-900 z-10 pb-2">
+        <Header onGeneratePost={handleGeneratePost} />
+      </div>
       
       {!isMobile && <div className="animate-fade-in">
           <div className="flex items-center mb-6 bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm border border-gray-100 dark:border-gray-700">
@@ -181,23 +195,8 @@ const PostGenerator = () => {
               <GeneratedPost content={post.content} isLoading={false} />
             </div>)}
         </div>}
-      
-      <Dialog open={showApiKeyModal} onOpenChange={setShowApiKeyModal}>
-        <DialogContent className="sm:max-w-md dark:bg-gray-800 dark:border-gray-700 rounded-xl">
-          <DialogHeader>
-            <DialogTitle className="dark:text-white flex items-center">
-              <KeyRound className="mr-2 h-5 w-5 text-twitter-blue" />
-              API Key Required
-            </DialogTitle>
-            <DialogDescription className="dark:text-gray-300">
-              Your free trial has ended. Please enter your Gemini API key to continue generating posts.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="p-4">
-            <ApiKeyInput onComplete={handleApiKeySetup} />
-          </div>
-        </DialogContent>
-      </Dialog>
-    </div>;
+    </div>
+  );
 };
+
 export default PostGenerator;
