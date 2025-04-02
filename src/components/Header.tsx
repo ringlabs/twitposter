@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Settings, Moon, Sun, MessageSquare, Sparkles } from "lucide-react";
@@ -10,11 +9,9 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useIsMobile } from "@/hooks/use-mobile";
 import { toast } from "sonner";
 import { ScrollArea } from "@/components/ui/scroll-area";
-
 interface HeaderProps {
   onGeneratePost: (specifyTopic?: boolean) => void;
 }
-
 const Header = ({
   onGeneratePost
 }: HeaderProps) => {
@@ -25,12 +22,10 @@ const Header = ({
   const [sheetOpen, setSheetOpen] = useState(false);
   const [settingsTab, setSettingsTab] = useState<string>("niche");
   const isMobile = useIsMobile();
-
   const toggleTheme = () => {
     setTheme(theme === "dark" ? "light" : "dark");
     toast.success(`Switched to ${theme === "dark" ? "light" : "dark"} mode`);
   };
-
   return <div className="w-full border-b border-gray-200 dark:border-gray-800 pb-4 mb-6 pt-4 py-[10px] bg-gray-50 dark:bg-gray-900 sticky top-0 z-50">
       <div className="flex items-center justify-between px-2">
         <div className="flex items-center">
@@ -41,7 +36,7 @@ const Header = ({
             </div>
           </div>
           {!isMobile && <h1 className="text-2xl font-bold text-gray-900 dark:text-white ml-2">
-              TwitWise<span className="text-twitter-blue">Creator</span>
+              TwitWise<span className="text-twitter-blue">Poster</span>
             </h1>}
         </div>
         
@@ -108,5 +103,4 @@ const Header = ({
       </div>
     </div>;
 };
-
 export default Header;
