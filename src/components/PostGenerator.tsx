@@ -121,7 +121,7 @@ const PostGenerator = () => {
       </div>
       
       {!isMobile && <div className="animate-fade-in">
-          <div className="flex items-center mb-6 rounded-lg p-4 shadow-sm border border-gray-100 dark:border-gray-700 mx-[16px] bg-gray-100">
+          <div className="flex items-center mb-6 rounded-lg p-4 shadow-sm border border-gray-100 dark:border-gray-700 mx-[16px] bg-gray-100 dark:bg-gray-800">
             <div className="flex-1">
               <p className="text-twitter-darkGray dark:text-gray-300 mb-1">
                 Currently generating posts for <span className="font-medium text-twitter-blue">{selectedNiche.name}</span>
