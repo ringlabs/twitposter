@@ -185,7 +185,7 @@ const PostGenerator = () => {
           </Card>
         </div>}
 
-      {postHistory.length > 0 && <div className="space-y-6 px-4\n">
+      {postHistory.length > 0 && <div className="space-y-6 px-4 mb-12\n">
           {postHistory.map((post, index) => <div key={post.id} className="animate-fade-in" style={{
         animationDelay: `${index * 0.1}s`
       }}>
