@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import TwitterPostGenerator from "./pages/TwitterPostGenerator";
@@ -19,9 +20,34 @@ const App = () => {
     const { theme } = useTheme();
     const isMobile = useIsMobile();
     
+    // JSON-LD structured data for better SEO
+    const jsonLd = {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "TwitWise",
+      "description": "AI-powered Twitter post generator for creating engaging content",
+      "applicationCategory": "SocialMediaApplication",
+      "operatingSystem": "Any",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "author": {
+        "@type": "Organization",
+        "name": "TwitWise",
+        "url": "https://twitwise.app"
+      }
+    };
+    
     return (
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
+          <Helmet>
+            <script type="application/ld+json">
+              {JSON.stringify(jsonLd)}
+            </script>
+          </Helmet>
           <Toaster />
           <Sonner />
           <BrowserRouter>

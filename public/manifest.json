@@ -1,0 +1,39 @@
+
+{
+  "short_name": "TwitWise",
+  "name": "TwitWise AI Post Generator",
+  "description": "Create engaging Twitter posts in seconds with TwitWise AI",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "64x64",
+      "type": "image/png"
+    },
+    {
+      "src": "/logo192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/logo512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#1DA1F2",
+  "background_color": "#ffffff",
+  "orientation": "portrait",
+  "scope": "/",
+  "shortcuts": [
+    {
+      "name": "Generate Post",
+      "short_name": "Generate",
+      "description": "Create a new Twitter post",
+      "url": "/twitter_post_generator",
+      "icons": [{ "src": "/shortcut-icon.png", "sizes": "192x192" }]
+    }
+  ]
+}
