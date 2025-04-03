@@ -1,16 +1,16 @@
 
+import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import TwitterPostGenerator from "./pages/TwitterPostGenerator";
 import { useTheme } from "./hooks/useTheme";
 import { useIsMobile } from "./hooks/use-mobile";
-import { X } from "lucide-react";
 
 const queryClient = new QueryClient();
 
@@ -41,45 +41,51 @@ const App = () => {
     };
     
     return (
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
+      <React.StrictMode>
+        <QueryClientProvider client={queryClient}>
           <Helmet>
             <script type="application/ld+json">
               {JSON.stringify(jsonLd)}
             </script>
           </Helmet>
-          <Toaster />
-          <Sonner />
           <BrowserRouter>
-            <div className="min-h-screen bg-gradient-to-br from-white to-twitter-extraLightGray dark:from-gray-900 dark:to-gray-800 transition-all duration-300">
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/twitter_post_generator" element={<TwitterPostGenerator />} />
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </div>
+            <TooltipProvider>
+              <div className="min-h-screen bg-gradient-to-br from-white to-twitter-extraLightGray dark:from-gray-900 dark:to-gray-800 transition-all duration-300">
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/twitter_post_generator" element={<TwitterPostGenerator />} />
+                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </div>
+              <Toaster />
+              <Sonner />
+            </TooltipProvider>
           </BrowserRouter>
-        </TooltipProvider>
-      </QueryClientProvider>
+        </QueryClientProvider>
+      </React.StrictMode>
     );
   } catch (error) {
     // Fallback if there's an error initializing the theme
     console.error("Error in App:", error);
     return (
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
+      <React.StrictMode>
+        <QueryClientProvider client={queryClient}>
           <BrowserRouter>
-            <div className="min-h-screen bg-white">
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/twitter_post_generator" element={<TwitterPostGenerator />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </div>
+            <TooltipProvider>
+              <div className="min-h-screen bg-white">
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/twitter_post_generator" element={<TwitterPostGenerator />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+                <Toaster />
+                <Sonner />
+              </div>
+            </TooltipProvider>
           </BrowserRouter>
-        </TooltipProvider>
-      </QueryClientProvider>
+        </QueryClientProvider>
+      </React.StrictMode>
     );
   }
 };
