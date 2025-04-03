@@ -53,7 +53,7 @@ const Header = ({
             </SheetTrigger>
             <SheetContent className="p-0 w-full h-full sm:max-w-md dark:border-gray-800 bg-gray-50">
               <div className="flex flex-col h-full">
-                <SheetHeader className="p-4 border-b dark:border-gray-800">
+                <SheetHeader className="p-4 border-b dark:border-gray-800 bg-slate-300">
                   <div className="flex items-center justify-between">
                     <SheetTitle className="text-xl dark:text-white flex items-center">
                       <Settings className="mr-2 h-5 w-5" />
@@ -69,7 +69,7 @@ const Header = ({
                     </div>
                   </div>
                 </SheetHeader>
-                <ScrollArea className="flex-1 p-4">
+                <ScrollArea className="flex-1 p-4 bg-slate-300">
                   {settingsTab === "niche" && <div className="animate-fade-in">
                     <NicheSelector onComplete={() => setSheetOpen(false)} inSettings={true} />
                   </div>}
