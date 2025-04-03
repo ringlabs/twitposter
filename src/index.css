@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -207,4 +206,84 @@
 
 .sidebar-item-active {
   @apply bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-50;
+}
+
+/* Custom Toast Styling */
+:root {
+  --toast-background: var(--background);
+  --toast-foreground: var(--foreground);
+  --toast-border: var(--border);
+}
+
+.dark {
+  --toast-background: var(--background);
+  --toast-foreground: var(--foreground);
+  --toast-border: var(--border);
+}
+
+/* Toast styling */
+[data-sonner-toaster] [data-sonner-toast] {
+  @apply bg-background border border-border text-foreground;
+}
+
+[data-sonner-toast] [data-close-button] {
+  @apply p-1.5 hover:bg-muted/50 rounded-md;
+}
+
+[data-sonner-toast] [data-sonner-toast-title] {
+  @apply font-medium text-foreground;
+}
+
+[data-sonner-toast] [data-sonner-toast-description] {
+  @apply text-sm text-foreground/80;
+}
+
+/* Dark mode overrides for toasts */
+.dark [data-sonner-toast] {
+  @apply border-gray-700 bg-gray-800 text-white;
+}
+
+.dark [data-sonner-toast] [data-close-button] {
+  @apply text-gray-300 hover:bg-gray-700/80;
+}
+
+.dark [data-sonner-toast] [data-sonner-toast-title] {
+  @apply text-white;
+}
+
+.dark [data-sonner-toast] [data-sonner-toast-description] {
+  @apply text-gray-300;
+}
+
+/* Toast types styling */
+.dark [data-sonner-toast][data-type="success"] {
+  @apply bg-green-900/20 border-green-800 text-green-400;
+}
+
+.dark [data-sonner-toast][data-type="error"] {
+  @apply bg-red-900/20 border-red-800 text-red-400;
+}
+
+.dark [data-sonner-toast][data-type="info"] {
+  @apply bg-blue-900/20 border-blue-800 text-blue-400;
+}
+
+.dark [data-sonner-toast][data-type="warning"] {
+  @apply bg-yellow-900/20 border-yellow-800 text-yellow-400;
+}
+
+[data-sonner-toast][data-type="success"] {
+  @apply bg-green-50 border-green-200 text-green-600;
+}
+
+[data-sonner-toast][data-type="error"] {
+  @apply bg-red-50 border-red-200 text-red-600;
+}
+
+[data-sonner-toast][data-type="info"] {
+  @apply bg-blue-50 border-blue-200 text-blue-600;
+}
+
+[data-sonner-toast][data-type="warning"] {
+  @apply bg-yellow-50 border-yellow-200 text-yellow-600;
 }

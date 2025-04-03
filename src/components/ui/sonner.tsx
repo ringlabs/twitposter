@@ -2,6 +2,7 @@
 import { useTheme } from "next-themes"
 import { Toaster as Sonner } from "sonner"
 import { useIsMobile } from "@/hooks/use-mobile"
+import { X } from "lucide-react"
 
 type ToasterProps = React.ComponentProps<typeof Sonner>
 
@@ -12,7 +13,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
   return (
     <Sonner
       theme={theme as ToasterProps["theme"]}
-      position={isMobile ? "top-center" : "bottom-right"}
+      position={isMobile ? "bottom-center" : "bottom-right"}
       closeButton
       richColors
       expand={false}
@@ -20,14 +21,15 @@ const Toaster = ({ ...props }: ToasterProps) => {
         duration: 4000,
         className: "group",
         classNames: {
-          toast: "group rounded-lg border-border",
+          toast: "group rounded-lg border-border py-3 shadow-sm",
           title: "text-foreground text-base font-medium",
           description: "text-foreground text-sm",
           actionButton: "bg-primary text-primary-foreground",
           cancelButton: "bg-muted text-muted-foreground",
-          closeButton: "text-foreground",
+          closeButton: "text-foreground relative ml-auto inline-flex",
         },
         descriptionClassName: "text-foreground text-sm",
+        icon: null,
       }}
       {...props}
     />
