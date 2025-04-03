@@ -20,14 +20,6 @@ const Toaster = ({ ...props }: ToasterProps) => {
       toastOptions={{
         duration: 4000,
         className: "group",
-        classNames: {
-          toast: "group rounded-lg border-border py-3 shadow-sm",
-          title: "text-foreground text-base font-medium",
-          description: "text-foreground text-sm",
-          actionButton: "bg-primary text-primary-foreground",
-          cancelButton: "bg-muted text-muted-foreground",
-          closeButton: "text-foreground relative ml-auto inline-flex",
-        },
         descriptionClassName: "text-foreground text-sm",
         // Remove the 'icon' property as it doesn't exist in ToastOptions type
       }}
