@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,7 +11,6 @@ import { toast } from "sonner";
 import Header from "./Header";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Skeleton } from "@/components/ui/skeleton";
-
 interface Post {
   id: string;
   content: string;
@@ -20,26 +18,21 @@ interface Post {
   nicheId: string;
   topic?: string;
 }
-
 const POSTS_STORAGE_KEY = "twitter_generated_posts";
-
 const PostGenerator = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [showSpecifyForm, setShowSpecifyForm] = useState(false);
   const [specificTopic, setSpecificTopic] = useState("");
   const [postHistory, setPostHistory] = useState<Post[]>([]);
   const isMobile = useIsMobile();
-  
   const selectedNicheId = localStorage.getItem(LOCAL_STORAGE_NICHE_KEY) || "general";
   const selectedNiche = NICHES.find(niche => niche.id === selectedNicheId) || {
     id: "general",
     name: "General"
   };
-  
   const hasFreeTrialPosts = !isFreeTrialExhausted();
   const freeTrialRemaining = 5 - getFreeTrialUsage();
   const userHasApiKey = !!getApiKey();
-
   useEffect(() => {
     const savedPosts = localStorage.getItem(POSTS_STORAGE_KEY);
     if (savedPosts) {
@@ -51,11 +44,9 @@ const PostGenerator = () => {
       }
     }
   }, []);
-
   useEffect(() => {
     localStorage.setItem(POSTS_STORAGE_KEY, JSON.stringify(postHistory));
   }, [postHistory]);
-
   const addPostToHistory = (content: string, topic?: string) => {
     const newPost: Post = {
       id: Date.now().toString(),
@@ -66,30 +57,24 @@ const PostGenerator = () => {
     };
     setPostHistory(prevPosts => [newPost, ...prevPosts]);
   };
-
   const deletePost = (postId: string) => {
     setPostHistory(prevPosts => prevPosts.filter(post => post.id !== postId));
   };
-
   const handleAutoGenerate = async () => {
     if (!userHasApiKey && !hasFreeTrialPosts) {
       window.location.reload();
       return;
     }
-    
     setIsGenerating(true);
-    
     try {
       const post = await generatePost(selectedNicheId);
       addPostToHistory(post);
-      
       if (!userHasApiKey && hasFreeTrialPosts) {
         const remainingPosts = freeTrialRemaining - 1;
         toast.info(`You have ${remainingPosts} free trial posts remaining`);
       }
     } catch (error) {
       console.error("Error generating post:", error);
-      
       if (error instanceof Error && error.message === "Free trial exhausted. Please enter your API key.") {
         window.location.reload();
       } else {
@@ -99,30 +84,24 @@ const PostGenerator = () => {
       setIsGenerating(false);
     }
   };
-
   const handleSpecificGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!userHasApiKey && !hasFreeTrialPosts) {
       window.location.reload();
       return;
     }
-    
     setIsGenerating(true);
     setShowSpecifyForm(false);
-    
     try {
       const post = await generatePost(selectedNicheId, specificTopic);
       addPostToHistory(post, specificTopic);
       setSpecificTopic("");
-      
       if (!userHasApiKey && hasFreeTrialPosts) {
         const remainingPosts = freeTrialRemaining - 1;
         toast.info(`You have ${remainingPosts} free trial posts remaining`);
       }
     } catch (error) {
       console.error("Error generating post:", error);
-      
       if (error instanceof Error && error.message === "Free trial exhausted. Please enter your API key.") {
         window.location.reload();
       } else {
@@ -132,7 +111,6 @@ const PostGenerator = () => {
       setIsGenerating(false);
     }
   };
-
   const handleGeneratePost = (specifyTopic = false) => {
     if (specifyTopic) {
       setShowSpecifyForm(true);
@@ -140,7 +118,6 @@ const PostGenerator = () => {
       handleAutoGenerate();
     }
   };
-
   return <div className="w-full max-w-2xl mx-auto p-0">
       <div className="sticky top-0 bg-transparent z-10 p-0 mb-6 w-full">
         <Header onGeneratePost={handleGeneratePost} />
@@ -166,7 +143,7 @@ const PostGenerator = () => {
           </div>
         </div>}
 
-      {showSpecifyForm && <Card className="mb-6 border-twitter-blue/30 shadow-md dark:bg-gray-800 dark:border-twitter-blue/50 rounded-xl animate-fade-in card-modern">
+      {showSpecifyForm && <Card className="mb-6 border-twitter-blue/30 shadow-md dark:bg-gray-800 dark:border-twitter-blue/50 rounded-xl animate-fade-in card-modern mx-4">
           <CardHeader>
             <CardTitle className="text-lg dark:text-white flex items-center">
               <MessageCircle className="mr-2 h-5 w-5 text-twitter-blue" />
@@ -230,14 +207,9 @@ const PostGenerator = () => {
           {postHistory.map((post, index) => <div key={post.id} className="animate-fade-in" style={{
         animationDelay: `${index * 0.1}s`
       }}>
-              <GeneratedPost 
-                content={post.content} 
-                isLoading={false} 
-                onDelete={() => deletePost(post.id)}
-              />
+              <GeneratedPost content={post.content} isLoading={false} onDelete={() => deletePost(post.id)} />
             </div>)}
         </div>}
     </div>;
 };
-
 export default PostGenerator;
