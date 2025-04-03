@@ -24,7 +24,7 @@ const App = () => {
     const jsonLd = {
       "@context": "https://schema.org",
       "@type": "WebApplication",
-      "name": "TwitWise",
+      "name": "TwitPoster",
       "description": "AI-powered Twitter post generator for creating engaging content",
       "applicationCategory": "SocialMediaApplication",
       "operatingSystem": "Any",
@@ -35,8 +35,8 @@ const App = () => {
       },
       "author": {
         "@type": "Organization",
-        "name": "TwitWise",
-        "url": "https://twitwise.app"
+        "name": "TwitPoster",
+        "url": "https://twitposter.app"
       }
     };
     

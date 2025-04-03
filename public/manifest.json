@@ -1,8 +1,8 @@
 
 {
-  "short_name": "TwitWise",
-  "name": "TwitWise AI Post Generator",
-  "description": "Create engaging Twitter posts in seconds with TwitWise AI",
+  "short_name": "TwitPoster",
+  "name": "TwitPoster AI Post Generator",
+  "description": "Create engaging Twitter posts in seconds with TwitPoster AI",
   "icons": [
     {
       "src": "/favicon.png",

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Settings, Moon, Sun, MessageSquare, Sparkles } from "lucide-react";
@@ -9,9 +10,11 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useIsMobile } from "@/hooks/use-mobile";
 import { toast } from "sonner";
 import { ScrollArea } from "@/components/ui/scroll-area";
+
 interface HeaderProps {
   onGeneratePost: (specifyTopic?: boolean) => void;
 }
+
 const Header = ({
   onGeneratePost
 }: HeaderProps) => {
@@ -22,21 +25,23 @@ const Header = ({
   const [sheetOpen, setSheetOpen] = useState(false);
   const [settingsTab, setSettingsTab] = useState<string>("niche");
   const isMobile = useIsMobile();
+  
   const toggleTheme = () => {
     setTheme(theme === "dark" ? "light" : "dark");
     toast.success(`Switched to ${theme === "dark" ? "light" : "dark"} mode`);
   };
+  
   return <div className="w-full border border-gray-200 dark:border-gray-800 sticky top-0 z-50 py-4 pb-1.5 rounded-b-lg bg-slate-300 dark:bg-gray-800">
       <div className="flex items-center justify-between px-2">
         <div className="flex items-center">
           <div className="relative mr-2">
             <div className="w-10 h-10 bg-twitter-blue rounded-full flex items-center justify-center shadow-md">
-              <span className="text-white text-lg font-bold">TW</span>
+              <span className="text-white text-lg font-bold">TP</span>
               <span className="absolute -top-1 -right-1 w-3 h-3 bg-white rounded-full animate-pulse"></span>
             </div>
           </div>
           {!isMobile && <h1 className="text-2xl font-bold text-gray-900 dark:text-white ml-2">
-              TwitWise<span className="text-twitter-blue">Poster</span>
+              TwitPoster
             </h1>}
         </div>
         
@@ -103,4 +108,5 @@ const Header = ({
       </div>
     </div>;
 };
+
 export default Header;
