@@ -29,7 +29,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
           closeButton: "text-foreground relative ml-auto inline-flex",
         },
         descriptionClassName: "text-foreground text-sm",
-        icon: null,
+        // Remove the 'icon' property as it doesn't exist in ToastOptions type
       }}
       {...props}
     />
