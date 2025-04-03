@@ -9,6 +9,7 @@ let userApiKey: string | null = localStorage.getItem("gemini_api_key");
 const FREE_TRIAL_KEY = "AIzaSyCETmVzAEQdD5lFpql415j06FjJlah59Gk";
 const FREE_TRIAL_LIMIT = 5;
 const FREE_TRIAL_USAGE_KEY = "free_trial_usage";
+const CHAT_HISTORY_KEY = "gemini_chat_history";
 
 // Initialize the Google Generative AI client
 let genAI: GoogleGenerativeAI | null = null;
@@ -18,6 +19,19 @@ if (userApiKey) {
 } else {
   // Use free trial key when no user key is provided
   genAI = new GoogleGenerativeAI(FREE_TRIAL_KEY);
+}
+
+// Type definitions for chat history
+interface ChatMessage {
+  role: "user" | "model";
+  parts: string;
+  timestamp: number;
+  nicheId: string;
+  topic?: string;
+}
+
+interface ChatHistoryByNiche {
+  [nicheId: string]: ChatMessage[];
 }
 
 // Mock responses as fallback if API key is not provided
@@ -83,11 +97,57 @@ export const clearApiKey = (): void => {
   toast.success("API key removed");
 };
 
+// Get chat history from localStorage
+export const getChatHistory = (nicheId: string): ChatMessage[] => {
+  try {
+    const historyString = localStorage.getItem(CHAT_HISTORY_KEY);
+    if (!historyString) return [];
+    
+    const historyByNiche = JSON.parse(historyString) as ChatHistoryByNiche;
+    return historyByNiche[nicheId] || [];
+  } catch (error) {
+    console.error("Error retrieving chat history:", error);
+    return [];
+  }
+};
+
+// Save a new message to chat history
+export const saveChatMessage = (message: ChatMessage): void => {
+  try {
+    const historyString = localStorage.getItem(CHAT_HISTORY_KEY);
+    const historyByNiche: ChatHistoryByNiche = historyString ? JSON.parse(historyString) : {};
+    
+    if (!historyByNiche[message.nicheId]) {
+      historyByNiche[message.nicheId] = [];
+    }
+    
+    // Add the new message
+    historyByNiche[message.nicheId].push(message);
+    
+    // Limit history to last 10 messages per niche to avoid localStorage size issues
+    if (historyByNiche[message.nicheId].length > 10) {
+      historyByNiche[message.nicheId] = historyByNiche[message.nicheId].slice(-10);
+    }
+    
+    localStorage.setItem(CHAT_HISTORY_KEY, JSON.stringify(historyByNiche));
+  } catch (error) {
+    console.error("Error saving chat message to history:", error);
+  }
+};
+
+// Clear all chat history
+export const clearChatHistory = (): void => {
+  localStorage.removeItem(CHAT_HISTORY_KEY);
+};
+
 export const generatePost = async (
   niche: string,
   specificTopic?: string
 ): Promise<string> => {
   try {
+    // Get existing chat history for this niche
+    const chatHistory = getChatHistory(niche);
+    
     // Check if we should use the free trial key
     if (!userApiKey && !isFreeTrialExhausted()) {
       // Use the free trial key
@@ -118,15 +178,12 @@ export const generatePost = async (
       model: "gemini-2.0-flash",
     });
 
-    let prompt = "";
-    if (specificTopic) {
-      prompt = `Create a Twitter post about ${specificTopic}. The post must be engaging, informative, and include relevant hashtags. Keep it under Twitter's character limit. Respond with just the text of the post, nothing else.`;
-    } else {
-      prompt = `Create a Twitter post about a topic in the ${niche} niche. The post must be engaging, informative, and include relevant hashtags. Keep it under Twitter's character limit. Respond with just the text of the post, nothing else.`;
-    }
-
-    const result = await model.generateContent({
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
+    // Create a chat session
+    const chat = model.startChat({
+      history: chatHistory.map(msg => ({
+        role: msg.role as "user" | "model",
+        parts: [{ text: msg.parts }]
+      })),
       generationConfig: {
         temperature: 1,
         topP: 0.95,
@@ -134,9 +191,35 @@ export const generatePost = async (
         maxOutputTokens: 280, // Twitter's character limit
       },
     });
+
+    let prompt = "";
+    if (specificTopic) {
+      prompt = `Create a Twitter post about ${specificTopic}. The post must be engaging, informative, and include relevant hashtags. Keep it under Twitter's character limit. Respond with just the text of the post, nothing else.`;
+    } else {
+      prompt = `Create a Twitter post about a topic in the ${niche} niche. The post must be engaging, informative, and include relevant hashtags. Keep it under Twitter's character limit. Respond with just the text of the post, nothing else.`;
+    }
+
+    // Save user message to history
+    saveChatMessage({
+      role: "user",
+      parts: prompt,
+      timestamp: Date.now(),
+      nicheId: niche,
+      topic: specificTopic
+    });
+
+    // Send the message
+    const result = await chat.sendMessage(prompt);
+    const text = result.response.text();
     
-    const response = result.response;
-    const text = response.text();
+    // Save model response to history
+    saveChatMessage({
+      role: "model",
+      parts: text,
+      timestamp: Date.now(),
+      nicheId: niche,
+      topic: specificTopic
+    });
     
     return text;
   } catch (error) {
@@ -164,6 +247,9 @@ export const generateAlternativePost = async (
   specificTopic?: string
 ): Promise<string> => {
   try {
+    // Get existing chat history for this niche
+    const chatHistory = getChatHistory(niche);
+    
     // If we don't have an API key, use the original generatePost function
     if (!genAI || !userApiKey) {
       return generatePost(niche, specificTopic);
@@ -174,15 +260,12 @@ export const generateAlternativePost = async (
       model: "gemini-2.0-flash",
     });
 
-    let prompt = "";
-    if (specificTopic) {
-      prompt = `Create a different Twitter post about ${specificTopic}. The previous one wasn't quite right. Make this one more engaging, informative, and include relevant hashtags. Keep it under Twitter's character limit. Respond with just the text of the post, nothing else.`;
-    } else {
-      prompt = `Create a different Twitter post about a topic in the ${niche} niche. The previous one wasn't quite right. Make this one more engaging, informative, and include relevant hashtags. Keep it under Twitter's character limit. Respond with just the text of the post, nothing else.`;
-    }
-
-    const result = await model.generateContent({
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
+    // Create a chat session with history
+    const chat = model.startChat({
+      history: chatHistory.map(msg => ({
+        role: msg.role as "user" | "model",
+        parts: [{ text: msg.parts }]
+      })),
       generationConfig: {
         temperature: 1,
         topP: 0.95,
@@ -190,9 +273,35 @@ export const generateAlternativePost = async (
         maxOutputTokens: 280, // Twitter's character limit
       },
     });
+
+    let prompt = "";
+    if (specificTopic) {
+      prompt = `Create a different Twitter post about ${specificTopic}. The previous one wasn't quite right. Make this one more engaging, informative, and include relevant hashtags. Keep it under Twitter's character limit. Respond with just the text of the post, nothing else.`;
+    } else {
+      prompt = `Create a different Twitter post about a topic in the ${niche} niche. The previous one wasn't quite right. Make this one more engaging, informative, and include relevant hashtags. Keep it under Twitter's character limit. Respond with just the text of the post, nothing else.`;
+    }
+
+    // Save user message to history
+    saveChatMessage({
+      role: "user",
+      parts: prompt,
+      timestamp: Date.now(),
+      nicheId: niche,
+      topic: specificTopic
+    });
+
+    // Send the message
+    const result = await chat.sendMessage(prompt);
+    const text = result.response.text();
     
-    const response = result.response;
-    const text = response.text();
+    // Save model response to history
+    saveChatMessage({
+      role: "model",
+      parts: text,
+      timestamp: Date.now(),
+      nicheId: niche,
+      topic: specificTopic
+    });
     
     return text;
   } catch (error) {
