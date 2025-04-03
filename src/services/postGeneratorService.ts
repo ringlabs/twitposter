@@ -1,3 +1,4 @@
+
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { toast } from "sonner";
 
@@ -188,7 +189,7 @@ export const generatePost = async (
         temperature: 1,
         topP: 0.95,
         topK: 40,
-        maxOutputTokens: 280, // Twitter's character limit
+        maxOutputTokens: 65, // Changed from 280 to 65 as per user request
       },
     });
 
@@ -270,7 +271,7 @@ export const generateAlternativePost = async (
         temperature: 1,
         topP: 0.95,
         topK: 40,
-        maxOutputTokens: 280, // Twitter's character limit
+        maxOutputTokens: 65, // Changed from 280 to 65 as per user request
       },
     });
 
