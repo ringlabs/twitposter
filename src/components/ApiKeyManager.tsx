@@ -12,6 +12,7 @@ const ApiKeyManager = () => {
   const [apiKey, setApiKeyState] = useState("");
   const [savedApiKey, setSavedApiKey] = useState<string | null>(null);
   const [isInIframe, setIsInIframe] = useState(false);
+  const [tutorialExpanded, setTutorialExpanded] = useState(false);
 
   useEffect(() => {
     // Check if page is in an iframe or being rendered by puppeteer
@@ -70,6 +71,10 @@ const ApiKeyManager = () => {
     setTimeout(() => {
       window.location.href = "/";
     }, 1500);
+  };
+
+  const toggleTutorial = () => {
+    setTutorialExpanded(prev => !prev);
   };
 
   return (
@@ -140,7 +145,7 @@ const ApiKeyManager = () => {
           )}
         </div>
 
-        <GoogleApiKeyTutorial />
+        <GoogleApiKeyTutorial isExpanded={tutorialExpanded} onToggle={toggleTutorial} />
       </CardContent>
       <CardFooter className="pt-2 text-xs text-gray-500 dark:text-gray-400">
         Your API key is stored locally in your browser.

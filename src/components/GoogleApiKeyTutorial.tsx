@@ -3,7 +3,6 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp, Image, ExternalLink } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface TutorialStep {
@@ -46,7 +45,7 @@ const tutorialSteps: TutorialStep[] = [{
   imageAlt: "Twitter Post Generator API key input field"
 }];
 
-interface GoogleApiKeyTutorialProps {
+export interface GoogleApiKeyTutorialProps {
   isExpanded: boolean;
   onToggle: () => void;
 }
@@ -57,29 +56,36 @@ const GoogleApiKeyTutorial = ({
 }: GoogleApiKeyTutorialProps) => {
   const isMobile = useIsMobile();
   
-  return <div className="mt-4 border-t pt-4 animate-fade-in">
+  return (
+    <div className="mt-4 border-t pt-4 animate-fade-in">
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-sm ms:text-lg text-twitter-blue flex items-center font-medium">
           How to Get Your Gemini API Key
         </h3>
         <Button variant="ghost" size="sm" className="text-twitter-blue hover:bg-twitter-blue/10" onClick={onToggle}>
-          {isExpanded ? <>
+          {isExpanded ? (
+            <>
               <ChevronUp className="h-4 w-4 mr-1" />
               Hide Steps
-            </> : <>
+            </>
+          ) : (
+            <>
               <ChevronDown className="h-4 w-4 mr-1" />
               Show Steps
-            </>}
+            </>
+          )}
         </Button>
       </div>
       
-      {isExpanded && <>
+      {isExpanded && (
+        <>
           <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
             Follow these step-by-step instructions to obtain your API key from Google AI Studio
           </p>
           
           <div className="space-y-4 mb-4">
-            {tutorialSteps.map((step, index) => <Card key={index} className="border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+            {tutorialSteps.map((step, index) => (
+              <Card key={index} className="border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
                 <CardContent className="p-1">
                   <div className="flex flex-col gap-4">
                     <div className="relative overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center border border-gray-200 dark:border-gray-700 w-full min-h-80">
@@ -102,7 +108,8 @@ const GoogleApiKeyTutorial = ({
                     </div>
                   </div>
                 </CardContent>
-              </Card>)}
+              </Card>
+            ))}
           </div>
           
           <div className="flex justify-end">
@@ -111,8 +118,10 @@ const GoogleApiKeyTutorial = ({
               <ExternalLink className="ml-1 h-4 w-4" />
             </Button>
           </div>
-        </>}
-    </div>;
+        </>
+      )}
+    </div>
+  );
 };
 
 export default GoogleApiKeyTutorial;
