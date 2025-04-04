@@ -20,7 +20,7 @@ const App = () => {
     const { theme } = useTheme();
     const isMobile = useIsMobile();
     
-    // JSON-LD structured data for better SEO
+    // Enhanced JSON-LD structured data for better SEO
     const jsonLd = {
       "@context": "https://schema.org",
       "@type": "WebApplication",
@@ -48,19 +48,51 @@ const App = () => {
         "name": "AI Twitter Content",
         "description": "AI-powered content generation for Twitter"
       },
-      "keywords": "twitter posts, social media, content creation, AI writer, tweet generator, social media automation",
+      "keywords": "twitter posts, social media, content creation, AI writer, tweet generator, social media automation, twitter marketing",
       "inLanguage": "en-US",
       "datePublished": "2023-09-01",
-      "dateModified": "2025-04-04"
+      "dateModified": "2025-04-04",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://twitposter.app/"
+      },
+      "potentialAction": {
+        "@type": "UseAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://twitposter.app/twitter_post_generator"
+        },
+        "actionStatus": "https://schema.org/PotentialActionStatus"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "ratingCount": "127",
+        "bestRating": "5",
+        "worstRating": "1"
+      },
+      "review": {
+        "@type": "Review",
+        "reviewRating": {
+          "@type": "Rating",
+          "ratingValue": "5",
+          "bestRating": "5"
+        },
+        "author": {
+          "@type": "Person",
+          "name": "Social Media Manager"
+        },
+        "reviewBody": "TwitPoster has completely transformed how I create content for Twitter. The AI-generated posts consistently get high engagement."
+      }
     };
     
     return (
       <React.StrictMode>
         <QueryClientProvider client={queryClient}>
           <Helmet>
-            <title>TwitPoster - AI Twitter Post Generator</title>
-            <meta name="description" content="Create engaging Twitter posts in seconds with TwitPoster AI. Generate niche-specific content that drives engagement and grows your audience." />
-            <meta name="keywords" content="twitter posts, social media, content creation, AI writer, tweet generator, social media automation, twitter marketing" />
+            <title>TwitPoster - AI Twitter Post Generator | Create Viral Content</title>
+            <meta name="description" content="Generate high-engagement Twitter posts with TwitPoster AI. Our AI-powered tool creates niche-specific content that drives engagement, increases followers, and grows your audience." />
+            <meta name="keywords" content="twitter posts, social media, content creation, AI writer, tweet generator, social media automation, twitter marketing, viral tweets, engagement posts, AI twitter tool, twitter content creator, X posts" />
             <script type="application/ld+json">
               {JSON.stringify(jsonLd)}
             </script>

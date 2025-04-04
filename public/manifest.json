@@ -2,7 +2,7 @@
 {
   "short_name": "TwitPoster",
   "name": "TwitPoster AI Post Generator",
-  "description": "Create engaging Twitter posts in seconds with TwitPoster AI. An AI-powered tool for social media content creation that helps you grow your audience and increase engagement.",
+  "description": "Create engaging Twitter posts in seconds with TwitPoster AI. An AI-powered tool for social media content creation that helps you grow your audience, increase engagement, and save time on content creation. Generate high-performing tweets for any niche or industry.",
   "icons": [
     {
       "src": "/favicon.png",
@@ -36,5 +36,29 @@
       "icons": [{ "src": "/shortcut-icon.png", "sizes": "192x192" }]
     }
   ],
-  "categories": ["social", "productivity", "utilities"]
+  "categories": ["social", "productivity", "utilities", "ai tools", "content creation", "social media automation"],
+  "screenshots": [
+    {
+      "src": "/screenshot1.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "platform": "wide",
+      "label": "TwitPoster Home Screen"
+    },
+    {
+      "src": "/screenshot2.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "platform": "wide",
+      "label": "Post Generator Interface"
+    }
+  ],
+  "related_applications": [
+    {
+      "platform": "web",
+      "url": "https://twitposter.app"
+    }
+  ],
+  "prefer_related_applications": false,
+  "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7"
 }
