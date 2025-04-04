@@ -4,9 +4,9 @@ User-agent: *
 Allow: /
 
 # Sitemap location
-Sitemap: https://twitwise.app/sitemap.xml
+Sitemap: https://twitposter.app/sitemap.xml
 
-# Specify crawlers
+# Specify major search engines
 User-agent: Googlebot
 Allow: /
 
@@ -18,3 +18,15 @@ Allow: /
 
 User-agent: facebookexternalhit
 Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+User-agent: Baiduspider
+Allow: /
+
+User-agent: YandexBot
+Allow: /
+
+# Specify crawl delay
+Crawl-delay: 10

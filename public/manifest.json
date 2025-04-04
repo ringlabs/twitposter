@@ -2,7 +2,7 @@
 {
   "short_name": "TwitPoster",
   "name": "TwitPoster AI Post Generator",
-  "description": "Create engaging Twitter posts in seconds with TwitPoster AI",
+  "description": "Create engaging Twitter posts in seconds with TwitPoster AI. An AI-powered tool for social media content creation that helps you grow your audience and increase engagement.",
   "icons": [
     {
       "src": "/favicon.png",
@@ -35,5 +35,6 @@
       "url": "/twitter_post_generator",
       "icons": [{ "src": "/shortcut-icon.png", "sizes": "192x192" }]
     }
-  ]
+  ],
+  "categories": ["social", "productivity", "utilities"]
 }

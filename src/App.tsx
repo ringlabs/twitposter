@@ -25,7 +25,8 @@ const App = () => {
       "@context": "https://schema.org",
       "@type": "WebApplication",
       "name": "TwitPoster",
-      "description": "AI-powered Twitter post generator for creating engaging content",
+      "headline": "TwitPoster - AI-Powered Twitter Content Creator",
+      "description": "AI-powered Twitter post generator for creating engaging content that drives traffic and increases engagement",
       "applicationCategory": "SocialMediaApplication",
       "operatingSystem": "Any",
       "offers": {
@@ -36,14 +37,30 @@ const App = () => {
       "author": {
         "@type": "Organization",
         "name": "TwitPoster",
-        "url": "https://twitposter.app"
-      }
+        "url": "https://twitposter.app",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://twitposter.app/logo512.png"
+        }
+      },
+      "about": {
+        "@type": "Thing",
+        "name": "AI Twitter Content",
+        "description": "AI-powered content generation for Twitter"
+      },
+      "keywords": "twitter posts, social media, content creation, AI writer, tweet generator, social media automation",
+      "inLanguage": "en-US",
+      "datePublished": "2023-09-01",
+      "dateModified": "2025-04-04"
     };
     
     return (
       <React.StrictMode>
         <QueryClientProvider client={queryClient}>
           <Helmet>
+            <title>TwitPoster - AI Twitter Post Generator</title>
+            <meta name="description" content="Create engaging Twitter posts in seconds with TwitPoster AI. Generate niche-specific content that drives engagement and grows your audience." />
+            <meta name="keywords" content="twitter posts, social media, content creation, AI writer, tweet generator, social media automation, twitter marketing" />
             <script type="application/ld+json">
               {JSON.stringify(jsonLd)}
             </script>
