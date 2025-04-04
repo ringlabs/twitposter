@@ -42,6 +42,7 @@ const GeneratedPost = ({
     if (deleteConfirm && onDelete) {
       onDelete();
       toast.success("Post deleted");
+      setDeleteConfirm(false); // Reset state after deletion
     } else {
       setDeleteConfirm(true);
     }
@@ -100,8 +101,8 @@ const GeneratedPost = ({
               </div>
             </div>
             <div className="ml-3">
-              <p className="font-bold text-gray-900 dark:text-white">TwitWise AI</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">@twitwise_ai</p>
+              <p className="font-bold text-gray-900 dark:text-white">TwitPoster AI</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">@twitposter_ai</p>
             </div>
           </div>
           
@@ -110,7 +111,7 @@ const GeneratedPost = ({
           </p>
           
           <div className="mt-4 text-xs text-gray-500 dark:text-gray-400">
-            {new Date().toLocaleTimeString()} · TwitWise Creator
+            {new Date().toLocaleTimeString()} · TwitPoster Creator
           </div>
         </div>
       </CardContent>

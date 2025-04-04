@@ -3,7 +3,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { LOCAL_STORAGE_NICHE_KEY } from "@/constants/niches";
-import { generatePost, isFreeTrialExhausted, getFreeTrialUsage, getApiKey } from "@/services/postGeneratorService";
+import { generatePost, isFreeTrialExhausted, getFreeTrialUsage, getApiKey, getChatHistory, saveChatMessage, clearChatHistory } from "@/services/postGeneratorService";
 import GeneratedPost from "./GeneratedPost";
 import { NICHES } from "@/constants/niches";
 import { Sparkles, MessageCircle } from "lucide-react";
@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import Header from "./Header";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Skeleton } from "@/components/ui/skeleton";
+
 interface Post {
   id: string;
   content: string;
@@ -18,21 +19,26 @@ interface Post {
   nicheId: string;
   topic?: string;
 }
+
 const POSTS_STORAGE_KEY = "twitter_generated_posts";
+
 const PostGenerator = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [showSpecifyForm, setShowSpecifyForm] = useState(false);
   const [specificTopic, setSpecificTopic] = useState("");
   const [postHistory, setPostHistory] = useState<Post[]>([]);
   const isMobile = useIsMobile();
+  
   const selectedNicheId = localStorage.getItem(LOCAL_STORAGE_NICHE_KEY) || "general";
   const selectedNiche = NICHES.find(niche => niche.id === selectedNicheId) || {
     id: "general",
     name: "General"
   };
+
   const hasFreeTrialPosts = !isFreeTrialExhausted();
   const freeTrialRemaining = 5 - getFreeTrialUsage();
   const userHasApiKey = !!getApiKey();
+
   useEffect(() => {
     const savedPosts = localStorage.getItem(POSTS_STORAGE_KEY);
     if (savedPosts) {
@@ -42,11 +48,34 @@ const PostGenerator = () => {
       } catch (error) {
         console.error("Error parsing saved posts:", error);
       }
+    } else {
+      reconstructPostsFromChatHistory();
     }
   }, []);
+
   useEffect(() => {
+    console.log("Saving posts to localStorage:", postHistory);
     localStorage.setItem(POSTS_STORAGE_KEY, JSON.stringify(postHistory));
   }, [postHistory]);
+
+  const reconstructPostsFromChatHistory = () => {
+    const chatHistory = getChatHistory(selectedNicheId);
+    const modelMessages = chatHistory.filter(msg => msg.role === "model");
+    
+    if (modelMessages.length > 0) {
+      const reconstructedPosts = modelMessages.map(msg => ({
+        id: msg.timestamp.toString(),
+        content: msg.parts,
+        timestamp: msg.timestamp,
+        nicheId: msg.nicheId,
+        topic: msg.topic
+      }));
+      
+      setPostHistory(reconstructedPosts);
+      console.log("Reconstructed posts from chat history:", reconstructedPosts);
+    }
+  };
+
   const addPostToHistory = (content: string, topic?: string) => {
     const newPost: Post = {
       id: Date.now().toString(),
@@ -55,11 +84,34 @@ const PostGenerator = () => {
       nicheId: selectedNicheId,
       topic
     };
-    setPostHistory(prevPosts => [newPost, ...prevPosts]);
+    
+    setPostHistory(prevPosts => {
+      const updatedPosts = [newPost, ...prevPosts];
+      return updatedPosts;
+    });
   };
+
   const deletePost = (postId: string) => {
-    setPostHistory(prevPosts => prevPosts.filter(post => post.id !== postId));
+    const postToDelete = postHistory.find(post => post.id === postId);
+    
+    if (postToDelete) {
+      setPostHistory(prevPosts => prevPosts.filter(post => post.id !== postId));
+      
+      const chatHistory = getChatHistory(selectedNicheId);
+      const timestamp = parseInt(postId, 10);
+      
+      const modelIndex = chatHistory.findIndex(msg => 
+        msg.role === "model" && msg.timestamp === timestamp
+      );
+      
+      if (modelIndex > 0) {
+        chatHistory.splice(modelIndex - 1, 2);
+        clearChatHistory();
+        chatHistory.forEach(msg => saveChatMessage(msg));
+      }
+    }
   };
+
   const handleAutoGenerate = async () => {
     if (!userHasApiKey && !hasFreeTrialPosts) {
       window.location.reload();
@@ -84,6 +136,7 @@ const PostGenerator = () => {
       setIsGenerating(false);
     }
   };
+
   const handleSpecificGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!userHasApiKey && !hasFreeTrialPosts) {
@@ -111,6 +164,7 @@ const PostGenerator = () => {
       setIsGenerating(false);
     }
   };
+
   const handleGeneratePost = (specifyTopic = false) => {
     if (specifyTopic) {
       setShowSpecifyForm(true);
@@ -118,6 +172,7 @@ const PostGenerator = () => {
       handleAutoGenerate();
     }
   };
+
   return <div className="w-full max-w-2xl mx-auto p-0">
       <div className="sticky top-0 bg-transparent z-10 p-0 mb-6 w-full">
         <Header onGeneratePost={handleGeneratePost} />
@@ -169,7 +224,6 @@ const PostGenerator = () => {
           <Card className="overflow-hidden border border-gray-200 dark:border-gray-700 shadow-sm rounded-xl">
             <CardContent className="p-5">
               <div className="bg-white dark:bg-gray-900 rounded-xl p-5 border border-gray-100 dark:border-gray-800 min-h-[120px]">
-                {/* Twitter-like profile section */}
                 <div className="flex mb-3">
                   <Skeleton className="flex-shrink-0 w-10 h-10 rounded-full" />
                   <div className="ml-3 space-y-2">
@@ -178,7 +232,6 @@ const PostGenerator = () => {
                   </div>
                 </div>
                 
-                {/* Content section */}
                 <div className="space-y-2 mt-4">
                   <Skeleton className="h-4 w-full" />
                   <Skeleton className="h-4 w-full" />
@@ -186,7 +239,6 @@ const PostGenerator = () => {
                   <Skeleton className="h-4 w-1/2" />
                 </div>
                 
-                {/* Footer section */}
                 <div className="mt-4">
                   <Skeleton className="h-3 w-32" />
                 </div>
@@ -212,4 +264,5 @@ const PostGenerator = () => {
         </div>}
     </div>;
 };
+
 export default PostGenerator;

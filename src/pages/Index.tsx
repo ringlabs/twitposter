@@ -16,6 +16,9 @@ const Index = () => {
   }
 
   useEffect(() => {
+    // Check if we have any saved posts
+    const savedPosts = localStorage.getItem("twitter_generated_posts");
+    
     const timer = setTimeout(() => {
       navigate('/twitter_post_generator');
     }, 1500); // Short delay for animation
