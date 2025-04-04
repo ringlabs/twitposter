@@ -44,18 +44,24 @@ const PostGenerator = () => {
     if (savedPosts) {
       try {
         const parsedPosts = JSON.parse(savedPosts) as Post[];
-        setPostHistory(parsedPosts);
+        if (parsedPosts && parsedPosts.length > 0) {
+          console.log("Loaded saved posts from localStorage:", parsedPosts);
+          setPostHistory(parsedPosts);
+          return;
+        }
       } catch (error) {
         console.error("Error parsing saved posts:", error);
       }
-    } else {
-      reconstructPostsFromChatHistory();
     }
+    
+    reconstructPostsFromChatHistory();
   }, []);
 
   useEffect(() => {
-    console.log("Saving posts to localStorage:", postHistory);
-    localStorage.setItem(POSTS_STORAGE_KEY, JSON.stringify(postHistory));
+    if (postHistory.length > 0) {
+      console.log("Saving posts to localStorage:", postHistory);
+      localStorage.setItem(POSTS_STORAGE_KEY, JSON.stringify(postHistory));
+    }
   }, [postHistory]);
 
   const reconstructPostsFromChatHistory = () => {
@@ -72,6 +78,7 @@ const PostGenerator = () => {
       }));
       
       setPostHistory(reconstructedPosts);
+      localStorage.setItem(POSTS_STORAGE_KEY, JSON.stringify(reconstructedPosts));
       console.log("Reconstructed posts from chat history:", reconstructedPosts);
     }
   };

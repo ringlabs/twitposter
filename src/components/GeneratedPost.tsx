@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -57,7 +56,6 @@ const GeneratedPost = ({
     return <Card className="w-full border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300 rounded-xl dark:bg-gray-800 card-modern">
         <CardContent className="p-5">
           <div className="bg-white dark:bg-gray-900 rounded-xl p-5 border border-gray-100 dark:border-gray-800 min-h-[120px]">
-            {/* Twitter-like profile section */}
             <div className="flex mb-3">
               <Skeleton className="flex-shrink-0 w-10 h-10 rounded-full" />
               <div className="ml-3 space-y-2">
@@ -66,14 +64,12 @@ const GeneratedPost = ({
               </div>
             </div>
             
-            {/* Content section */}
             <div className="space-y-2 mt-4">
               <Skeleton className="h-4 w-full" />
               <Skeleton className="h-4 w-full" />
               <Skeleton className="h-4 w-3/4" />
             </div>
             
-            {/* Footer section */}
             <div className="mt-4">
               <Skeleton className="h-3 w-32" />
             </div>
@@ -93,11 +89,10 @@ const GeneratedPost = ({
   return <Card className="w-full border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300 rounded-xl dark:bg-gray-800 card-modern">
       <CardContent className="p-1">
         <div className="rounded-xl p-5 border border-white dark:border-gray-800 min-h-[120px] relative bg-gray-200 dark:bg-gray-900">
-          {/* Twitter-like post format */}
           <div className="flex mb-3">
             <div className="flex-shrink-0 w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
               <div className="w-full h-full flex items-center justify-center bg-twitter-blue text-white font-bold">
-                T
+                TP
               </div>
             </div>
             <div className="ml-3">
