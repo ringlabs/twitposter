@@ -1,47 +1,56 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronUp, Image, ExternalLink } from "lucide-react";
+import { ChevronDown, ChevronUp, ExternalLink } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface TutorialStep {
   title: string;
   description: string;
+  imageUrl: string;
   imageAlt: string;
 }
 
 const tutorialSteps: TutorialStep[] = [{
   title: "Create a Google Account",
   description: "If you don't have a Google account, create one. If you already have one, sign in to your account.",
+  imageUrl: "/st1.png",
   imageAlt: "Google account sign in page"
 }, {
   title: "Navigate to Google AI Studio",
   description: "Go to ai.google.dev in your browser to access Google AI Studio.",
+  imageUrl: "/st2.png",
   imageAlt: "Google AI Studio homepage"
 }, {
   title: "Get Started with Google AI Studio",
   description: "Click on 'Get Started' or sign in with your Google account.",
+  imageUrl: "/st3.png",
   imageAlt: "Google AI Studio get started page"
 }, {
   title: "Navigate to API Keys",
   description: "In Google AI Studio, click on your profile icon in the top-right corner and select 'API keys' from the dropdown menu.",
+  imageUrl: "/st4.png",
   imageAlt: "Google AI Studio profile dropdown showing API keys option"
 }, {
   title: "Create a New API Key",
   description: "Click on the 'Create API key' button to generate a new API key for your project.",
+  imageUrl: "/st5.png",
   imageAlt: "Google AI Studio create API key button"
 }, {
   title: "Name Your API Key",
   description: "Enter a name for your API key to help you remember what project it's for (e.g., 'Twitter Post Generator').",
+  imageUrl: "/st6.png",
   imageAlt: "Google AI Studio name your API key form"
 }, {
   title: "Copy Your API Key",
   description: "Your new API key will be displayed. Copy it immediately as you won't be able to see it again!",
+  imageUrl: "/st7.png",
   imageAlt: "Google AI Studio copy API key screen"
 }, {
   title: "Paste API Key in the App",
   description: "Return to the Twitter Post Generator and paste your copied API key into the API key input field.",
+  imageUrl: "/st8.png",
   imageAlt: "Twitter Post Generator API key input field"
 }];
 
@@ -89,10 +98,21 @@ const GoogleApiKeyTutorial = ({
                 <CardContent className="p-1">
                   <div className="flex flex-col gap-4">
                     <div className="relative overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center border border-gray-200 dark:border-gray-700 w-full min-h-80">
-                      <Image className="w-10 h-10 text-gray-400" />
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 text-center px-4">
-                        {step.imageAlt}
-                      </p>
+                      {step.imageUrl ? (
+                        <img 
+                          src={step.imageUrl} 
+                          alt={step.imageAlt} 
+                          className="w-full h-auto object-contain max-h-80" 
+                          onError={(e) => {
+                            console.error(`Failed to load image: ${step.imageUrl}`);
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
+                      ) : (
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 text-center px-4">
+                          {step.imageAlt}
+                        </p>
+                      )}
                     </div>
                     
                     <div className="w-full flex flex-col px-2 pb-2">
