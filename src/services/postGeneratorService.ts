@@ -8,7 +8,7 @@ let userApiKey: string | null = localStorage.getItem("gemini_api_key");
 
 // Free trial API key and usage tracking
 const FREE_TRIAL_KEY = "AIzaSyCETmVzAEQdD5lFpql415j06FjJlah59Gk";
-const FREE_TRIAL_LIMIT = 5;
+const FREE_TRIAL_LIMIT = 10; // Updated from 5 to 10
 const FREE_TRIAL_USAGE_KEY = "free_trial_usage";
 const CHAT_HISTORY_KEY = "gemini_chat_history";
 
