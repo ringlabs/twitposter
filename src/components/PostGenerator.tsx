@@ -36,7 +36,7 @@ const PostGenerator = () => {
   };
 
   const hasFreeTrialPosts = !isFreeTrialExhausted();
-  const freeTrialRemaining = 5 - getFreeTrialUsage();
+  const freeTrialRemaining = 10 - getFreeTrialUsage();
   const userHasApiKey = !!getApiKey();
 
   useEffect(() => {

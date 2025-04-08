@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { clearApiKey, getApiKey, setApiKey, clearChatHistory } from "@/services/postGeneratorService";
+import { clearApiKey, getApiKey, setApiKey, clearChatHistory, getFreeTrialUsage } from "@/services/postGeneratorService";
 import GoogleApiKeyTutorial from "./GoogleApiKeyTutorial";
 import { AlertTriangle, CheckCircle, Key, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -13,6 +13,7 @@ const ApiKeyManager = () => {
   const [savedApiKey, setSavedApiKey] = useState<string | null>(null);
   const [isInIframe, setIsInIframe] = useState(false);
   const [tutorialExpanded, setTutorialExpanded] = useState(false);
+  const freeTrialRemaining = 10 - getFreeTrialUsage(); // Added to display remaining free trial posts
 
   useEffect(() => {
     // Check if page is in an iframe or being rendered by puppeteer
@@ -103,6 +104,12 @@ const ApiKeyManager = () => {
               <p className="text-amber-700 dark:text-amber-400 text-sm">
                 You're using the free trial. For unlimited posts, enter your Gemini API key.
               </p>
+              {freeTrialRemaining > 0 && (
+                <p className="text-amber-700 dark:text-amber-400 text-sm mt-1">
+                  <span className="font-medium">Remaining: </span>
+                  {freeTrialRemaining} of 10 free trial posts
+                </p>
+              )}
             </div>
           </div>
         )}

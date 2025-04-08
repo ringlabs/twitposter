@@ -1,13 +1,16 @@
+
 import { useState, useEffect } from "react";
 import NicheSelector from "@/components/NicheSelector";
 import ApiKeyInput from "@/components/ApiKeyInput";
 import PostGenerator from "@/components/PostGenerator";
 import { LOCAL_STORAGE_NICHE_KEY } from "@/constants/niches";
 import { getApiKey, isFreeTrialExhausted } from "@/services/postGeneratorService";
+
 const TwitterPostGenerator = () => {
   const [hasSelectedNiche, setHasSelectedNiche] = useState(false);
   const [shouldShowApiKey, setShouldShowApiKey] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+
   useEffect(() => {
     // Check if niche is already selected in localStorage
     const savedNiche = localStorage.getItem(LOCAL_STORAGE_NICHE_KEY);
@@ -28,12 +31,15 @@ const TwitterPostGenerator = () => {
     }, 600);
     return () => clearTimeout(timer);
   }, []);
+
   const handleNicheSelectionComplete = () => {
     setHasSelectedNiche(true);
   };
+
   const handleApiKeyInputComplete = () => {
     setShouldShowApiKey(false);
   };
+
   if (isLoading) {
     return <div className="min-h-screen flex items-center justify-center dark:bg-gray-900">
         <div className="flex flex-col items-center gap-3">
@@ -59,4 +65,5 @@ const TwitterPostGenerator = () => {
       </div>
     </div>;
 };
+
 export default TwitterPostGenerator;

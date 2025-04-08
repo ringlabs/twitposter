@@ -18,7 +18,7 @@ const ApiKeyInput = ({
   const [apiKey, setApiKeyState] = useState<string>("");
   const [showTutorial, setShowTutorial] = useState<boolean>(false);
   const freeTrialExhausted = isFreeTrialExhausted();
-  const freeTrialRemaining = 5 - getFreeTrialUsage();
+  const freeTrialRemaining = 10 - getFreeTrialUsage(); // Updated to reflect 10 free posts
   
   const handleSubmit = () => {
     if (!apiKey.trim()) {
@@ -71,7 +71,7 @@ const ApiKeyInput = ({
                 <ShieldAlert className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 mr-2 flex-shrink-0" />
                 <div className="text-sm text-amber-700 dark:text-amber-300">
                   <p className="font-medium">No API key? Try our free trial!</p>
-                  <p className="mt-1">You can generate up to 5 posts without an API key.</p>
+                  <p className="mt-1">You can generate up to 10 posts without an API key.</p>
                 </div>
               </div>}
           </div>
