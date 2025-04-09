@@ -1,6 +1,6 @@
 
 // Service Worker for TwitPoster PWA
-const CACHE_NAME = 'twitposter-cache-v2';
+const CACHE_NAME = 'twitposter-cache-v3';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -15,6 +15,11 @@ const urlsToCache = [
   '/robots.txt',
   '/sitemap.xml',
   '/twitter_post_generator',
+  '/features',
+  '/about',
+  '/faq',
+  '/blog',
+  '/blog/how-to-create-viral-tweets',
   // Additional assets
   '/st1.png',
   '/st2.png',

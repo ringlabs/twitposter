@@ -5,10 +5,15 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
+import { Helmet, HelmetProvider } from "react-helmet-async";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import TwitterPostGenerator from "./pages/TwitterPostGenerator";
+import Features from "./pages/Features";
+import About from "./pages/About";
+import FAQ from "./pages/FAQ";
+import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
 import { useTheme } from "./hooks/useTheme";
 import { useIsMobile } from "./hooks/use-mobile";
 
@@ -88,30 +93,37 @@ const App = () => {
     
     return (
       <React.StrictMode>
-        <QueryClientProvider client={queryClient}>
-          <Helmet>
-            <title>TwitPoster - AI Twitter Post Generator | Create Viral Content</title>
-            <meta name="description" content="Generate high-engagement Twitter posts with TwitPoster AI. Our AI-powered tool creates niche-specific content that drives engagement, increases followers, and grows your audience." />
-            <meta name="keywords" content="twitter posts, social media, content creation, AI writer, tweet generator, social media automation, twitter marketing, viral tweets, engagement posts, AI twitter tool, twitter content creator, X posts" />
-            <script type="application/ld+json">
-              {JSON.stringify(jsonLd)}
-            </script>
-          </Helmet>
-          <BrowserRouter>
-            <TooltipProvider>
-              <div className="min-h-screen bg-gradient-to-br from-white to-twitter-extraLightGray dark:from-gray-900 dark:to-gray-800 transition-all duration-300">
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/twitter_post_generator" element={<TwitterPostGenerator />} />
-                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </div>
-              <Toaster />
-              <Sonner />
-            </TooltipProvider>
-          </BrowserRouter>
-        </QueryClientProvider>
+        <HelmetProvider>
+          <QueryClientProvider client={queryClient}>
+            <Helmet>
+              <title>TwitPoster - AI Twitter Post Generator | Create Viral Content</title>
+              <meta name="description" content="Generate high-engagement Twitter posts with TwitPoster AI. Our AI-powered tool creates niche-specific content that drives engagement, increases followers, and grows your audience." />
+              <meta name="keywords" content="twitter posts, social media, content creation, AI writer, tweet generator, social media automation, twitter marketing, viral tweets, engagement posts, AI twitter tool, twitter content creator, X posts" />
+              <script type="application/ld+json">
+                {JSON.stringify(jsonLd)}
+              </script>
+            </Helmet>
+            <BrowserRouter>
+              <TooltipProvider>
+                <div className="min-h-screen bg-gradient-to-br from-white to-twitter-extraLightGray dark:from-gray-900 dark:to-gray-800 transition-all duration-300">
+                  <Routes>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/twitter_post_generator" element={<TwitterPostGenerator />} />
+                    <Route path="/features" element={<Features />} />
+                    <Route path="/about" element={<About />} />
+                    <Route path="/faq" element={<FAQ />} />
+                    <Route path="/blog" element={<Blog />} />
+                    <Route path="/blog/:postId" element={<BlogPost />} />
+                    {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </div>
+                <Toaster />
+                <Sonner />
+              </TooltipProvider>
+            </BrowserRouter>
+          </QueryClientProvider>
+        </HelmetProvider>
       </React.StrictMode>
     );
   } catch (error) {
@@ -126,6 +138,11 @@ const App = () => {
                 <Routes>
                   <Route path="/" element={<Index />} />
                   <Route path="/twitter_post_generator" element={<TwitterPostGenerator />} />
+                  <Route path="/features" element={<Features />} />
+                  <Route path="/about" element={<About />} />
+                  <Route path="/faq" element={<FAQ />} />
+                  <Route path="/blog" element={<Blog />} />
+                  <Route path="/blog/:postId" element={<BlogPost />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
                 <Toaster />
