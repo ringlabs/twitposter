@@ -23,13 +23,3 @@ export const NICHES = [
 ];
 
 export const LOCAL_STORAGE_NICHE_KEY = 'twitwise-selected-niche';
-
-/**
- * Get the display name of a niche by its ID
- * @param nicheId The ID of the niche
- * @returns The display name of the niche, or "General" if not found
- */
-export const getNicheValue = (nicheId: string): string => {
-  const niche = NICHES.find(n => n.id === nicheId);
-  return niche ? niche.name : "General";
-};

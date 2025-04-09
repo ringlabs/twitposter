@@ -2,12 +2,6 @@
 # TwitPoster SEO-Optimized robots.txt
 User-agent: *
 Allow: /
-Allow: /twitter_post_generator
-Allow: /features
-Allow: /about
-Allow: /faq
-Allow: /blog
-Allow: /blog/*
 Disallow: /admin/
 Disallow: /api/
 Disallow: /private/
@@ -23,35 +17,28 @@ Sitemap: https://twitposter.app/sitemap.xml
 # Specific directives for major search engines
 User-agent: Googlebot
 Allow: /
-Allow: /twitter_post_generator
 Crawl-delay: 1
 
 User-agent: Bingbot
 Allow: /
-Allow: /twitter_post_generator
 Crawl-delay: 2
 
 User-agent: Twitterbot
 Allow: /
-Allow: /twitter_post_generator
 Crawl-delay: 1
 
 User-agent: facebookexternalhit
 Allow: /
-Allow: /twitter_post_generator
 
 User-agent: DuckDuckBot
 Allow: /
-Allow: /twitter_post_generator
 
 User-agent: Baiduspider
 Allow: /
-Allow: /twitter_post_generator
 Crawl-delay: 5
 
 User-agent: YandexBot
 Allow: /
-Allow: /twitter_post_generator
 Crawl-delay: 5
 
 User-agent: SemrushBot
