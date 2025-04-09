@@ -1,31 +1,25 @@
 
-# TwitPoster SEO-Optimized robots.txt
+# TwitPoster robots.txt - Optimized for search engine indexing
 User-agent: *
 Allow: /
 Disallow: /admin/
 Disallow: /api/
 Disallow: /private/
-Disallow: /*/private/
-Disallow: */private/*
-
-# Optimized crawling directives
-Crawl-delay: 1
 
 # Sitemap location
 Sitemap: https://twitposter.app/sitemap.xml
 
-# Specific directives for major search engines
+# Specify major search engines
 User-agent: Googlebot
 Allow: /
-Crawl-delay: 1
+Crawl-delay: 5
 
 User-agent: Bingbot
 Allow: /
-Crawl-delay: 2
+Crawl-delay: 5
 
 User-agent: Twitterbot
 Allow: /
-Crawl-delay: 1
 
 User-agent: facebookexternalhit
 Allow: /
@@ -35,24 +29,20 @@ Allow: /
 
 User-agent: Baiduspider
 Allow: /
-Crawl-delay: 5
+Crawl-delay: 10
 
 User-agent: YandexBot
 Allow: /
-Crawl-delay: 5
+Crawl-delay: 10
 
 User-agent: SemrushBot
-Crawl-delay: 10
+Allow: /
+Crawl-delay: 20
 
 User-agent: AhrefsBot
-Crawl-delay: 10
+Allow: /
+Crawl-delay: 20
 
 User-agent: MJ12bot
-Crawl-delay: 10
-
-# Speed optimization for media-focused crawlers
-User-agent: Googlebot-Image
-Crawl-delay: 1
-
-User-agent: Googlebot-Video
-Crawl-delay: 1
+Allow: /
+Crawl-delay: 20
