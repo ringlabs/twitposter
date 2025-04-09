@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import Header from "./Header";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Skeleton } from "@/components/ui/skeleton";
+
 interface Post {
   id: string;
   content: string;
@@ -18,21 +19,26 @@ interface Post {
   nicheId: string;
   topic?: string;
 }
+
 const POSTS_STORAGE_KEY = "twitter_generated_posts";
+
 const PostGenerator = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [showSpecifyForm, setShowSpecifyForm] = useState(false);
   const [specificTopic, setSpecificTopic] = useState("");
   const [postHistory, setPostHistory] = useState<Post[]>([]);
   const isMobile = useIsMobile();
+  
   const selectedNicheId = localStorage.getItem(LOCAL_STORAGE_NICHE_KEY) || "general";
   const selectedNiche = NICHES.find(niche => niche.id === selectedNicheId) || {
     id: "general",
     name: "General"
   };
+
   const hasFreeTrialPosts = !isFreeTrialExhausted();
   const freeTrialRemaining = 10 - getFreeTrialUsage();
   const userHasApiKey = !!getApiKey();
+
   useEffect(() => {
     const savedPosts = localStorage.getItem(POSTS_STORAGE_KEY);
     if (savedPosts) {
@@ -47,17 +53,21 @@ const PostGenerator = () => {
         console.error("Error parsing saved posts:", error);
       }
     }
+    
     reconstructPostsFromChatHistory();
   }, []);
+
   useEffect(() => {
     if (postHistory.length > 0) {
       console.log("Saving posts to localStorage:", postHistory);
       localStorage.setItem(POSTS_STORAGE_KEY, JSON.stringify(postHistory));
     }
   }, [postHistory]);
+
   const reconstructPostsFromChatHistory = () => {
     const chatHistory = getChatHistory(selectedNicheId);
     const modelMessages = chatHistory.filter(msg => msg.role === "model");
+    
     if (modelMessages.length > 0) {
       const reconstructedPosts = modelMessages.map(msg => ({
         id: msg.timestamp.toString(),
@@ -66,11 +76,13 @@ const PostGenerator = () => {
         nicheId: msg.nicheId,
         topic: msg.topic
       }));
+      
       setPostHistory(reconstructedPosts);
       localStorage.setItem(POSTS_STORAGE_KEY, JSON.stringify(reconstructedPosts));
       console.log("Reconstructed posts from chat history:", reconstructedPosts);
     }
   };
+
   const addPostToHistory = (content: string, topic?: string) => {
     const newPost: Post = {
       id: Date.now().toString(),
@@ -79,18 +91,26 @@ const PostGenerator = () => {
       nicheId: selectedNicheId,
       topic
     };
+    
     setPostHistory(prevPosts => {
       const updatedPosts = [newPost, ...prevPosts];
       return updatedPosts;
     });
   };
+
   const deletePost = (postId: string) => {
     const postToDelete = postHistory.find(post => post.id === postId);
+    
     if (postToDelete) {
       setPostHistory(prevPosts => prevPosts.filter(post => post.id !== postId));
+      
       const chatHistory = getChatHistory(selectedNicheId);
       const timestamp = parseInt(postId, 10);
-      const modelIndex = chatHistory.findIndex(msg => msg.role === "model" && msg.timestamp === timestamp);
+      
+      const modelIndex = chatHistory.findIndex(msg => 
+        msg.role === "model" && msg.timestamp === timestamp
+      );
+      
       if (modelIndex > 0) {
         chatHistory.splice(modelIndex - 1, 2);
         clearChatHistory();
@@ -98,6 +118,7 @@ const PostGenerator = () => {
       }
     }
   };
+
   const handleAutoGenerate = async () => {
     if (!userHasApiKey && !hasFreeTrialPosts) {
       window.location.reload();
@@ -122,6 +143,7 @@ const PostGenerator = () => {
       setIsGenerating(false);
     }
   };
+
   const handleSpecificGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!userHasApiKey && !hasFreeTrialPosts) {
@@ -149,6 +171,7 @@ const PostGenerator = () => {
       setIsGenerating(false);
     }
   };
+
   const handleGeneratePost = (specifyTopic = false) => {
     if (specifyTopic) {
       setShowSpecifyForm(true);
@@ -156,13 +179,14 @@ const PostGenerator = () => {
       handleAutoGenerate();
     }
   };
+
   return <div className="w-full max-w-2xl mx-auto p-0">
       <div className="sticky top-0 bg-transparent z-10 p-0 mb-6 w-full">
         <Header onGeneratePost={handleGeneratePost} />
       </div>
       
       {!isMobile && <div className="animate-fade-in">
-          <div className="flex items-center mb-6 rounded-lg p-4 shadow-sm border border-gray-100 dark:border-gray-700 mx-[16px] bg-gray-300 dark:bg-gray-800">
+          <div className="flex items-center mb-6 rounded-lg p-4 shadow-sm border border-gray-100 dark:border-gray-700 mx-[16px] bg-gray-100 dark:bg-gray-800">
             <div className="flex-1">
               <p className="text-twitter-darkGray dark:text-gray-300 mb-1">
                 Currently generating posts for <span className="font-medium text-twitter-blue">{selectedNiche.name}</span>
@@ -247,4 +271,5 @@ const PostGenerator = () => {
         </div>}
     </div>;
 };
+
 export default PostGenerator;
