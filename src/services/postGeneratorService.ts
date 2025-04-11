@@ -192,7 +192,7 @@ export async function saveChatMessage(message: ChatMessage): Promise<void> {
         content: message.parts,
         niche_id: message.nicheId,
         topic: message.topic || null,
-        timestamp: new Date(message.timestamp)
+        timestamp: new Date(message.timestamp).toISOString()
       });
     }
   } catch (error) {
@@ -283,3 +283,6 @@ export async function postToTwitter(content: string): Promise<boolean> {
   console.log("Sharing to Twitter:", content);
   return true;
 }
+
+// Export supabase for use in AuthContext
+export { supabase };
