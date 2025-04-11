@@ -35,9 +35,23 @@ const PostGenerator = () => {
     name: "General"
   };
 
-  const hasFreeTrialPosts = !isFreeTrialExhausted();
-  const freeTrialRemaining = 10 - getFreeTrialUsage();
-  const userHasApiKey = !!getApiKey();
+  const [freeTrialRemaining, setFreeTrialRemaining] = useState(0);
+  const [hasFreeTrialPosts, setHasFreeTrialPosts] = useState(false);
+  const [userHasApiKey, setUserHasApiKey] = useState(false);
+
+  useEffect(() => {
+    const loadUserStatus = async () => {
+      const freeTrialExhausted = await isFreeTrialExhausted();
+      const freeTrialUsage = await getFreeTrialUsage();
+      const apiKey = await getApiKey();
+      
+      setHasFreeTrialPosts(!freeTrialExhausted);
+      setFreeTrialRemaining(10 - freeTrialUsage);
+      setUserHasApiKey(!!apiKey);
+    };
+    
+    loadUserStatus();
+  }, []);
 
   useEffect(() => {
     const savedPosts = localStorage.getItem(POSTS_STORAGE_KEY);
@@ -130,6 +144,7 @@ const PostGenerator = () => {
       addPostToHistory(post);
       if (!userHasApiKey && hasFreeTrialPosts) {
         const remainingPosts = freeTrialRemaining - 1;
+        setFreeTrialRemaining(remainingPosts);
         toast.info(`You have ${remainingPosts} free trial posts remaining`);
       }
     } catch (error) {
@@ -158,6 +173,7 @@ const PostGenerator = () => {
       setSpecificTopic("");
       if (!userHasApiKey && hasFreeTrialPosts) {
         const remainingPosts = freeTrialRemaining - 1;
+        setFreeTrialRemaining(remainingPosts);
         toast.info(`You have ${remainingPosts} free trial posts remaining`);
       }
     } catch (error) {

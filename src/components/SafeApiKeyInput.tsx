@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from "react";
-import ApiKeyInput from "./ApiKeyInput";
-import { getRemainingFreeTrialPosts } from "./ApiKeyInput";
+import ApiKeyInput, { getRemainingFreeTrialPosts } from "./ApiKeyInput";
 
 // This wrapper component safely handles the typed API key input
 const SafeApiKeyInput = ({ onComplete }: { onComplete: () => void }) => {

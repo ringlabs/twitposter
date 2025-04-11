@@ -14,3 +14,27 @@ export async function getRemainingFreeTrialPosts(): Promise<number> {
     return 0;
   }
 }
+
+// Add a default export for the ApiKeyInput component
+const ApiKeyInput = ({ onComplete }: { onComplete: () => void }) => {
+  // Implementation would go here
+  return (
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="max-w-md w-full p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg">
+        <h2 className="text-2xl font-bold mb-4 text-center dark:text-white">API Key Required</h2>
+        <p className="text-gray-600 dark:text-gray-300 mb-6">
+          Your free trial has been exhausted. Please enter a Google Gemini API key to continue.
+        </p>
+        {/* API key input form would go here */}
+        <button 
+          onClick={onComplete}
+          className="w-full bg-twitter-blue hover:bg-twitter-darkBlue text-white font-medium py-2 px-4 rounded transition-colors"
+        >
+          Continue
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default ApiKeyInput;
