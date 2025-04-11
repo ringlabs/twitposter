@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
@@ -154,18 +155,82 @@ export async function isFreeTrialExhausted(): Promise<boolean> {
   return usage >= MAX_FREE_TRIAL_POSTS;
 }
 
-// Chat history functions
-export function getChatHistory(nicheId: string): ChatMessage[] {
-  // Try to get from localStorage first (for backward compatibility)
-  const storedHistory = localStorage.getItem(
-    `${LOCAL_STORAGE_CHAT_HISTORY_KEY}_${nicheId}`
-  );
+// Chat history functions - updated to use database
+export async function getChatHistory(nicheId: string): Promise<ChatMessage[]> {
+  // Try to get from Supabase first
+  try {
+    const { data: session } = await supabase.auth.getSession();
+    if (session.session) {
+      const { data, error } = await supabase
+        .from('chat_history')
+        .select('role, content, timestamp, niche_id, topic')
+        .eq('user_id', session.session.user.id)
+        .eq('niche_id', nicheId)
+        .order('timestamp', { ascending: false });
+      
+      if (error) {
+        console.error("Error fetching chat history from database:", error);
+      } else if (data && data.length > 0) {
+        // Convert from database format to ChatMessage format
+        const messages = data.map(item => ({
+          role: item.role as "user" | "model",
+          parts: item.content,
+          timestamp: new Date(item.timestamp).getTime(),
+          nicheId: item.niche_id,
+          topic: item.topic || undefined
+        }));
+        
+        // Clear local storage since we've migrated to database
+        localStorage.removeItem(`${LOCAL_STORAGE_CHAT_HISTORY_KEY}_${nicheId}`);
+        
+        return messages;
+      }
+    }
+  } catch (error) {
+    console.error("Error accessing database for chat history:", error);
+  }
   
+  // Fallback to localStorage if database access fails or no data found
+  const storedHistory = localStorage.getItem(`${LOCAL_STORAGE_CHAT_HISTORY_KEY}_${nicheId}`);
   if (storedHistory) {
     try {
-      return JSON.parse(storedHistory);
-    } catch (error) {
-      console.error("Error parsing chat history:", error);
+      const localMessages = JSON.parse(storedHistory) as ChatMessage[];
+      
+      // If we have local messages but couldn't access database, attempt to migrate them
+      const { data: session } = await supabase.auth.getSession();
+      if (session.session && localMessages.length > 0) {
+        console.log(`Migrating ${localMessages.length} local messages to database for niche ${nicheId}`);
+        
+        // Batch insert messages to database
+        try {
+          const messagesToInsert = localMessages.map(msg => ({
+            user_id: session.session.user.id,
+            role: msg.role,
+            content: msg.parts,
+            niche_id: msg.nicheId || nicheId,
+            topic: msg.topic || null,
+            timestamp: new Date(msg.timestamp).toISOString()
+          }));
+          
+          const { error: insertError } = await supabase
+            .from('chat_history')
+            .insert(messagesToInsert);
+            
+          if (insertError) {
+            console.error("Error migrating chat history to database:", insertError);
+          } else {
+            // Clear localStorage after successful migration
+            localStorage.removeItem(`${LOCAL_STORAGE_CHAT_HISTORY_KEY}_${nicheId}`);
+            console.log("Chat history successfully migrated to database");
+          }
+        } catch (migrationError) {
+          console.error("Error during chat history migration:", migrationError);
+        }
+      }
+      
+      return localMessages;
+    } catch (parseError) {
+      console.error("Error parsing chat history from localStorage:", parseError);
       return [];
     }
   }
@@ -174,19 +239,11 @@ export function getChatHistory(nicheId: string): ChatMessage[] {
 }
 
 export async function saveChatMessage(message: ChatMessage): Promise<void> {
-  // Save to localStorage first
-  const history = getChatHistory(message.nicheId);
-  history.push(message);
-  localStorage.setItem(
-    `${LOCAL_STORAGE_CHAT_HISTORY_KEY}_${message.nicheId}`,
-    JSON.stringify(history)
-  );
-
-  // Then save to Supabase if authenticated
   try {
+    // Try to save to Supabase first
     const { data: session } = await supabase.auth.getSession();
     if (session.session) {
-      await supabase.from('chat_history').insert({
+      const { error } = await supabase.from('chat_history').insert({
         user_id: session.session.user.id,
         role: message.role,
         content: message.parts,
@@ -194,28 +251,119 @@ export async function saveChatMessage(message: ChatMessage): Promise<void> {
         topic: message.topic || null,
         timestamp: new Date(message.timestamp).toISOString()
       });
+      
+      if (error) {
+        console.error("Error saving chat message to database:", error);
+        // Fallback to localStorage if database save fails
+        saveToLocalStorage(message);
+      } else {
+        console.log("Chat message saved to database:", message.parts.substring(0, 20) + "...");
+        return; // Success - exit function
+      }
+    } else {
+      // Not authenticated, use localStorage
+      saveToLocalStorage(message);
     }
   } catch (error) {
-    console.error("Error saving chat message to Supabase:", error);
+    console.error("Error during chat message save:", error);
+    // Fallback to localStorage
+    saveToLocalStorage(message);
+  }
+  
+  // Helper function to save to localStorage
+  function saveToLocalStorage(msg: ChatMessage) {
+    const history = getChatHistoryFromLocalStorage(msg.nicheId);
+    history.push(msg);
+    localStorage.setItem(
+      `${LOCAL_STORAGE_CHAT_HISTORY_KEY}_${msg.nicheId}`,
+      JSON.stringify(history)
+    );
+    console.log("Chat message saved to localStorage");
+  }
+  
+  // Helper function to get chat history from localStorage only
+  function getChatHistoryFromLocalStorage(nicheId: string): ChatMessage[] {
+    const storedHistory = localStorage.getItem(`${LOCAL_STORAGE_CHAT_HISTORY_KEY}_${nicheId}`);
+    if (storedHistory) {
+      try {
+        return JSON.parse(storedHistory);
+      } catch (error) {
+        console.error("Error parsing local chat history:", error);
+        return [];
+      }
+    }
+    return [];
   }
 }
 
-export async function clearChatHistory(): Promise<void> {
-  const nicheId = await getNichePreference() || "general";
-  localStorage.removeItem(`${LOCAL_STORAGE_CHAT_HISTORY_KEY}_${nicheId}`);
-  
-  // Also clear from Supabase if authenticated
+export async function deleteChatMessage(timestamp: number, nicheId: string): Promise<void> {
   try {
+    // Try to delete from Supabase first
     const { data: session } = await supabase.auth.getSession();
     if (session.session) {
-      await supabase.from('chat_history')
+      const timestampIso = new Date(timestamp).toISOString();
+      
+      const { error } = await supabase
+        .from('chat_history')
+        .delete()
+        .eq('user_id', session.session.user.id)
+        .eq('niche_id', nicheId)
+        .eq('timestamp', timestampIso);
+      
+      if (error) {
+        console.error("Error deleting chat message from database:", error);
+      } else {
+        console.log("Chat message deleted from database");
+        return; // Success - exit function
+      }
+    }
+  } catch (error) {
+    console.error("Error during chat message deletion:", error);
+  }
+  
+  // Fallback to deleting from localStorage
+  try {
+    const localStorageKey = `${LOCAL_STORAGE_CHAT_HISTORY_KEY}_${nicheId}`;
+    const storedHistory = localStorage.getItem(localStorageKey);
+    
+    if (storedHistory) {
+      const messages = JSON.parse(storedHistory) as ChatMessage[];
+      const filteredMessages = messages.filter(msg => msg.timestamp !== timestamp);
+      
+      if (filteredMessages.length < messages.length) {
+        localStorage.setItem(localStorageKey, JSON.stringify(filteredMessages));
+        console.log("Chat message deleted from localStorage");
+      }
+    }
+  } catch (localError) {
+    console.error("Error deleting chat message from localStorage:", localError);
+  }
+}
+
+export async function clearChatHistory(nicheId: string): Promise<void> {
+  try {
+    // Try to clear from Supabase first
+    const { data: session } = await supabase.auth.getSession();
+    if (session.session) {
+      const { error } = await supabase
+        .from('chat_history')
         .delete()
         .eq('user_id', session.session.user.id)
         .eq('niche_id', nicheId);
+      
+      if (error) {
+        console.error("Error clearing chat history from database:", error);
+      } else {
+        console.log("Chat history cleared from database");
+      }
     }
   } catch (error) {
-    console.error("Error clearing chat history from Supabase:", error);
+    console.error("Error during chat history clearing:", error);
   }
+  
+  // Also clear from localStorage for consistency
+  localStorage.removeItem(`${LOCAL_STORAGE_CHAT_HISTORY_KEY}_${nicheId}`);
+  console.log("Chat history cleared from localStorage");
 }
 
 // Post generation and related functions

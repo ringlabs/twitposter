@@ -1,9 +1,19 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { LOCAL_STORAGE_NICHE_KEY } from "@/constants/niches";
-import { generatePost, isFreeTrialExhausted, getFreeTrialUsage, getApiKey, getChatHistory, saveChatMessage, clearChatHistory } from "@/services/postGeneratorService";
+import { 
+  generatePost, 
+  isFreeTrialExhausted, 
+  getFreeTrialUsage, 
+  getApiKey, 
+  getChatHistory, 
+  saveChatMessage, 
+  clearChatHistory,
+  deleteChatMessage
+} from "@/services/postGeneratorService";
 import GeneratedPost from "./GeneratedPost";
 import { NICHES } from "@/constants/niches";
 import { Sparkles, MessageCircle } from "lucide-react";
@@ -54,21 +64,29 @@ const PostGenerator = () => {
   }, []);
 
   useEffect(() => {
-    const savedPosts = localStorage.getItem(POSTS_STORAGE_KEY);
-    if (savedPosts) {
-      try {
-        const parsedPosts = JSON.parse(savedPosts) as Post[];
-        if (parsedPosts && parsedPosts.length > 0) {
-          console.log("Loaded saved posts from localStorage:", parsedPosts);
-          setPostHistory(parsedPosts);
-          return;
+    const loadPosts = async () => {
+      // Try to load from localStorage first for fast loading
+      const savedPosts = localStorage.getItem(POSTS_STORAGE_KEY);
+      if (savedPosts) {
+        try {
+          const parsedPosts = JSON.parse(savedPosts) as Post[];
+          if (parsedPosts && parsedPosts.length > 0) {
+            console.log("Loaded saved posts from localStorage:", parsedPosts);
+            setPostHistory(parsedPosts);
+            
+            // Still load from chat history to ensure we have the latest
+            reconstructPostsFromChatHistory();
+            return;
+          }
+        } catch (error) {
+          console.error("Error parsing saved posts:", error);
         }
-      } catch (error) {
-        console.error("Error parsing saved posts:", error);
       }
-    }
+      
+      reconstructPostsFromChatHistory();
+    };
     
-    reconstructPostsFromChatHistory();
+    loadPosts();
   }, []);
 
   useEffect(() => {
@@ -78,22 +96,26 @@ const PostGenerator = () => {
     }
   }, [postHistory]);
 
-  const reconstructPostsFromChatHistory = () => {
-    const chatHistory = getChatHistory(selectedNicheId);
-    const modelMessages = chatHistory.filter(msg => msg.role === "model");
-    
-    if (modelMessages.length > 0) {
-      const reconstructedPosts = modelMessages.map(msg => ({
-        id: msg.timestamp.toString(),
-        content: msg.parts,
-        timestamp: msg.timestamp,
-        nicheId: msg.nicheId,
-        topic: msg.topic
-      }));
+  const reconstructPostsFromChatHistory = async () => {
+    try {
+      const chatHistory = await getChatHistory(selectedNicheId);
+      const modelMessages = chatHistory.filter(msg => msg.role === "model");
       
-      setPostHistory(reconstructedPosts);
-      localStorage.setItem(POSTS_STORAGE_KEY, JSON.stringify(reconstructedPosts));
-      console.log("Reconstructed posts from chat history:", reconstructedPosts);
+      if (modelMessages.length > 0) {
+        const reconstructedPosts = modelMessages.map(msg => ({
+          id: msg.timestamp.toString(),
+          content: msg.parts,
+          timestamp: msg.timestamp,
+          nicheId: msg.nicheId,
+          topic: msg.topic
+        }));
+        
+        setPostHistory(reconstructedPosts);
+        localStorage.setItem(POSTS_STORAGE_KEY, JSON.stringify(reconstructedPosts));
+        console.log("Reconstructed posts from chat history:", reconstructedPosts);
+      }
+    } catch (error) {
+      console.error("Error reconstructing posts from chat history:", error);
     }
   };
 
@@ -112,23 +134,42 @@ const PostGenerator = () => {
     });
   };
 
-  const deletePost = (postId: string) => {
+  const deletePost = async (postId: string) => {
     const postToDelete = postHistory.find(post => post.id === postId);
     
     if (postToDelete) {
       setPostHistory(prevPosts => prevPosts.filter(post => post.id !== postId));
       
-      const chatHistory = getChatHistory(selectedNicheId);
-      const timestamp = parseInt(postId, 10);
-      
-      const modelIndex = chatHistory.findIndex(msg => 
-        msg.role === "model" && msg.timestamp === timestamp
-      );
-      
-      if (modelIndex > 0) {
-        chatHistory.splice(modelIndex - 1, 2);
-        clearChatHistory();
-        chatHistory.forEach(msg => saveChatMessage(msg));
+      // Delete from database/localStorage
+      try {
+        const timestamp = parseInt(postId, 10);
+        
+        // First, find and delete the model message
+        await deleteChatMessage(timestamp, selectedNicheId);
+        
+        // Second, try to find and delete the related user message (usually right before this one)
+        // This is a bit tricky without having exact timestamps, so we get chat history again
+        const chatHistory = await getChatHistory(selectedNicheId);
+        const modelIndex = chatHistory.findIndex(msg => 
+          msg.role === "model" && msg.timestamp === timestamp
+        );
+        
+        if (modelIndex > 0) {
+          // User message is typically right before the model message
+          const userMessage = chatHistory[modelIndex - 1];
+          if (userMessage && userMessage.role === "user") {
+            await deleteChatMessage(userMessage.timestamp, selectedNicheId);
+          }
+        }
+        
+        // Update localStorage cache too
+        localStorage.setItem(POSTS_STORAGE_KEY, JSON.stringify(
+          postHistory.filter(post => post.id !== postId)
+        ));
+        
+      } catch (error) {
+        console.error("Error deleting messages:", error);
+        toast.error("Error deleting post");
       }
     }
   };
