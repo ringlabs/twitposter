@@ -1,17 +1,28 @@
 
-import { supabase } from "@/integrations/supabase/client";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { toast } from "sonner";
 
-// Constants
-const LOCAL_STORAGE_API_KEY = "gemini_api_key";
-const LOCAL_STORAGE_NICHE_KEY = "selected_niche";
-const LOCAL_STORAGE_FREE_TRIAL_KEY = "free_trial_used";
-const LOCAL_STORAGE_CHAT_HISTORY_KEY = "chat_history";
-const GEMINI_MODEL = "gemini-1.5-flash";
-const FREE_TRIAL_API_KEY = "AIzaSyCETmVzAEQdD5lFpql415j06FjJlah59Gk";
-const MAX_FREE_TRIAL_POSTS = 10;
+// For security reasons, we'll create a component to let users enter their own API key
+// In a production app, this should be stored in a backend service
+let userApiKey: string | null = localStorage.getItem("gemini_api_key");
 
-// Types
+// Free trial API key and usage tracking
+const FREE_TRIAL_KEY = "AIzaSyCETmVzAEQdD5lFpql415j06FjJlah59Gk";
+const FREE_TRIAL_LIMIT = 10; // Updated from 5 to 10
+const FREE_TRIAL_USAGE_KEY = "free_trial_usage";
+const CHAT_HISTORY_KEY = "gemini_chat_history";
+
+// Initialize the Google Generative AI client
+let genAI: GoogleGenerativeAI | null = null;
+
+if (userApiKey) {
+  genAI = new GoogleGenerativeAI(userApiKey);
+} else {
+  // Use free trial key when no user key is provided
+  genAI = new GoogleGenerativeAI(FREE_TRIAL_KEY);
+}
+
+// Type definitions for chat history
 interface ChatMessage {
   role: "user" | "model";
   parts: string;
@@ -20,417 +31,291 @@ interface ChatMessage {
   topic?: string;
 }
 
-// Supabase functions for user settings
-async function getUserSettings() {
-  const { data: session } = await supabase.auth.getSession();
-  if (!session.session) return null;
-
-  const { data, error } = await supabase
-    .from('user_settings')
-    .select('*')
-    .eq('id', session.session.user.id)
-    .single();
-
-  if (error) {
-    console.error("Error fetching user settings:", error);
-    return null;
-  }
-
-  return data;
+interface ChatHistoryByNiche {
+  [nicheId: string]: ChatMessage[];
 }
 
-async function updateUserSettings(settings: Partial<{
-  niche_preference: string;
-  gemini_api_key: string;
-  free_trial_used: number;
-}>) {
-  const { data: session } = await supabase.auth.getSession();
-  if (!session.session) {
-    throw new Error("User not authenticated");
-  }
+// Mock responses as fallback if API key is not provided
+const MOCK_RESPONSES: Record<string, string[]> = {
+  history: [
+    "On this day in 1969, humans first set foot on the Moon. Neil Armstrong's 'one small step' represented a giant leap for scientific achievement and human exploration. #SpaceHistory #Apollo11 #MoonLanding",
+    "The Roman Empire lasted for over 1,000 years, but did you know it was actually larger in 117 AD under Emperor Trajan than at any other point? His military campaigns expanded Roman territory to 5 million square kilometers! #AncientHistory #RomanEmpire #HistoricalFacts",
+  ],
+  science: [
+    "Scientists have discovered that octopuses actually edit their own RNA, allowing them to adapt to environmental changes without waiting for evolution to catch up. These incredible creatures are redefining what we know about genetic adaptation! #Science #Octopus #MarineBiology",
+    "The James Webb Space Telescope just captured images of the most distant galaxy ever observed - light that has been traveling for 13.4 billion years! We're literally looking back to when the universe was only 300 million years old. #Astronomy #JWST #CosmicDiscovery",
+  ],
+  tech: [
+    "AI can now write code better than most human programmers according to new benchmarks. The question isn't if AI will transform software development, but how quickly. Are we prepared for this shift? #AI #TechTrends #SoftwareDevelopment",
+    "Quantum computers just hit a new milestone: 1,000 qubits. While still experimental, this brings us closer to solving problems that classical computers would take billions of years to calculate. The computing revolution continues! #QuantumComputing #FutureTech #Innovation",
+  ],
+  // Default fallback for all other niches
+  default: [
+    "The best time to start was yesterday. The second best time is now. Whatever you've been putting off, take the first small step today. Progress compounds faster than you think. #Motivation #Growth #TakeAction",
+    "Did you know giraffes only sleep about 30 minutes per day? Talk about making the most of your waking hours! Nature's ultimate productivity hackers. #InterestingFacts #Wildlife #NatureFacts",
+  ]
+};
 
-  const { error } = await supabase
-    .from('user_settings')
-    .update(settings)
-    .eq('id', session.session.user.id);
+// Get a random response from the array (used as fallback)
+const getRandomResponse = (responses: string[]) => {
+  const randomIndex = Math.floor(Math.random() * responses.length);
+  return responses[randomIndex];
+};
 
-  if (error) {
-    console.error("Error updating user settings:", error);
-    throw error;
-  }
+export const getFreeTrialUsage = (): number => {
+  const usage = localStorage.getItem(FREE_TRIAL_USAGE_KEY);
+  return usage ? parseInt(usage, 10) : 0;
+};
+
+export const incrementFreeTrialUsage = (): void => {
+  const currentUsage = getFreeTrialUsage();
+  localStorage.setItem(FREE_TRIAL_USAGE_KEY, (currentUsage + 1).toString());
+};
+
+export const isFreeTrialExhausted = (): boolean => {
+  return getFreeTrialUsage() >= FREE_TRIAL_LIMIT;
+};
+
+export const isUsingFreeTrial = (): boolean => {
+  return !userApiKey && !isFreeTrialExhausted();
 }
 
-// API Key functions
-export async function getApiKey(): Promise<string | null> {
-  // Try to get from Supabase first
-  const settings = await getUserSettings();
-  if (settings?.gemini_api_key) {
-    return settings.gemini_api_key;
-  }
-  
-  // Fallback to localStorage
-  return localStorage.getItem(LOCAL_STORAGE_API_KEY);
-}
+export const setApiKey = (key: string): void => {
+  userApiKey = key;
+  localStorage.setItem("gemini_api_key", key);
+  genAI = new GoogleGenerativeAI(key);
+  toast.success("API key saved successfully!");
+};
 
-export async function setApiKey(apiKey: string): Promise<void> {
-  // Save to Supabase if authenticated
+export const getApiKey = (): string | null => {
+  return userApiKey;
+};
+
+export const clearApiKey = (): void => {
+  userApiKey = null;
+  localStorage.removeItem("gemini_api_key");
+  genAI = null;
+  toast.success("API key removed");
+};
+
+// Get chat history from localStorage
+export const getChatHistory = (nicheId: string): ChatMessage[] => {
   try {
-    await updateUserSettings({ gemini_api_key: apiKey });
+    const historyString = localStorage.getItem(CHAT_HISTORY_KEY);
+    if (!historyString) return [];
+    
+    const historyByNiche = JSON.parse(historyString) as ChatHistoryByNiche;
+    return historyByNiche[nicheId] || [];
   } catch (error) {
-    console.error("Error saving API key to Supabase:", error);
-    // Fallback to localStorage if Supabase fails
-    localStorage.setItem(LOCAL_STORAGE_API_KEY, apiKey);
-  }
-}
-
-export async function clearApiKey(): Promise<void> {
-  try {
-    await updateUserSettings({ gemini_api_key: null });
-  } catch (error) {
-    console.error("Error clearing API key from Supabase:", error);
-  }
-  
-  // Also clear from localStorage
-  localStorage.removeItem(LOCAL_STORAGE_API_KEY);
-}
-
-// Niche preference functions
-export async function getNichePreference(): Promise<string | null> {
-  // Try to get from Supabase first
-  const settings = await getUserSettings();
-  if (settings?.niche_preference) {
-    // Also update localStorage to keep in sync
-    localStorage.setItem(LOCAL_STORAGE_NICHE_KEY, settings.niche_preference);
-    return settings.niche_preference;
-  }
-  
-  // Fallback to localStorage
-  return localStorage.getItem(LOCAL_STORAGE_NICHE_KEY);
-}
-
-export async function setNichePreference(nicheId: string): Promise<void> {
-  // Save to localStorage first for immediate use
-  localStorage.setItem(LOCAL_STORAGE_NICHE_KEY, nicheId);
-  
-  // Then save to Supabase if authenticated
-  try {
-    await updateUserSettings({ niche_preference: nicheId });
-  } catch (error) {
-    console.error("Error saving niche preference to Supabase:", error);
-  }
-}
-
-// Free trial functions
-export async function getFreeTrialUsage(): Promise<number> {
-  // Try to get from Supabase first
-  const settings = await getUserSettings();
-  if (settings) {
-    // Update localStorage to keep in sync
-    localStorage.setItem(LOCAL_STORAGE_FREE_TRIAL_KEY, settings.free_trial_used.toString());
-    return settings.free_trial_used;
-  }
-  
-  // Fallback to localStorage
-  const usageStr = localStorage.getItem(LOCAL_STORAGE_FREE_TRIAL_KEY);
-  return usageStr ? parseInt(usageStr, 10) : 0;
-}
-
-export async function incrementFreeTrialUsage(): Promise<void> {
-  const currentUsage = await getFreeTrialUsage();
-  const newUsage = currentUsage + 1;
-  
-  // Update localStorage first
-  localStorage.setItem(LOCAL_STORAGE_FREE_TRIAL_KEY, newUsage.toString());
-  
-  // Then update Supabase if authenticated
-  try {
-    await updateUserSettings({ free_trial_used: newUsage });
-  } catch (error) {
-    console.error("Error updating free trial usage in Supabase:", error);
-  }
-}
-
-export async function isFreeTrialExhausted(): Promise<boolean> {
-  const usage = await getFreeTrialUsage();
-  return usage >= MAX_FREE_TRIAL_POSTS;
-}
-
-// Chat history functions - updated to use database
-export async function getChatHistory(nicheId: string): Promise<ChatMessage[]> {
-  // Try to get from Supabase first
-  try {
-    const { data: session } = await supabase.auth.getSession();
-    if (session.session) {
-      const { data, error } = await supabase
-        .from('chat_history')
-        .select('role, content, timestamp, niche_id, topic')
-        .eq('user_id', session.session.user.id)
-        .eq('niche_id', nicheId)
-        .order('timestamp', { ascending: false });
-      
-      if (error) {
-        console.error("Error fetching chat history from database:", error);
-      } else if (data && data.length > 0) {
-        // Convert from database format to ChatMessage format
-        const messages = data.map(item => ({
-          role: item.role as "user" | "model",
-          parts: item.content,
-          timestamp: new Date(item.timestamp).getTime(),
-          nicheId: item.niche_id,
-          topic: item.topic || undefined
-        }));
-        
-        // Clear local storage since we've migrated to database
-        localStorage.removeItem(`${LOCAL_STORAGE_CHAT_HISTORY_KEY}_${nicheId}`);
-        
-        return messages;
-      }
-    }
-  } catch (error) {
-    console.error("Error accessing database for chat history:", error);
-  }
-  
-  // Fallback to localStorage if database access fails or no data found
-  const storedHistory = localStorage.getItem(`${LOCAL_STORAGE_CHAT_HISTORY_KEY}_${nicheId}`);
-  if (storedHistory) {
-    try {
-      const localMessages = JSON.parse(storedHistory) as ChatMessage[];
-      
-      // If we have local messages but couldn't access database, attempt to migrate them
-      const { data: session } = await supabase.auth.getSession();
-      if (session.session && localMessages.length > 0) {
-        console.log(`Migrating ${localMessages.length} local messages to database for niche ${nicheId}`);
-        
-        // Batch insert messages to database
-        try {
-          const messagesToInsert = localMessages.map(msg => ({
-            user_id: session.session.user.id,
-            role: msg.role,
-            content: msg.parts,
-            niche_id: msg.nicheId || nicheId,
-            topic: msg.topic || null,
-            timestamp: new Date(msg.timestamp).toISOString()
-          }));
-          
-          const { error: insertError } = await supabase
-            .from('chat_history')
-            .insert(messagesToInsert);
-            
-          if (insertError) {
-            console.error("Error migrating chat history to database:", insertError);
-          } else {
-            // Clear localStorage after successful migration
-            localStorage.removeItem(`${LOCAL_STORAGE_CHAT_HISTORY_KEY}_${nicheId}`);
-            console.log("Chat history successfully migrated to database");
-          }
-        } catch (migrationError) {
-          console.error("Error during chat history migration:", migrationError);
-        }
-      }
-      
-      return localMessages;
-    } catch (parseError) {
-      console.error("Error parsing chat history from localStorage:", parseError);
-      return [];
-    }
-  }
-  
-  return [];
-}
-
-export async function saveChatMessage(message: ChatMessage): Promise<void> {
-  try {
-    // Try to save to Supabase first
-    const { data: session } = await supabase.auth.getSession();
-    if (session.session) {
-      const { error } = await supabase.from('chat_history').insert({
-        user_id: session.session.user.id,
-        role: message.role,
-        content: message.parts,
-        niche_id: message.nicheId,
-        topic: message.topic || null,
-        timestamp: new Date(message.timestamp).toISOString()
-      });
-      
-      if (error) {
-        console.error("Error saving chat message to database:", error);
-        // Fallback to localStorage if database save fails
-        saveToLocalStorage(message);
-      } else {
-        console.log("Chat message saved to database:", message.parts.substring(0, 20) + "...");
-        return; // Success - exit function
-      }
-    } else {
-      // Not authenticated, use localStorage
-      saveToLocalStorage(message);
-    }
-  } catch (error) {
-    console.error("Error during chat message save:", error);
-    // Fallback to localStorage
-    saveToLocalStorage(message);
-  }
-  
-  // Helper function to save to localStorage
-  function saveToLocalStorage(msg: ChatMessage) {
-    const history = getChatHistoryFromLocalStorage(msg.nicheId);
-    history.push(msg);
-    localStorage.setItem(
-      `${LOCAL_STORAGE_CHAT_HISTORY_KEY}_${msg.nicheId}`,
-      JSON.stringify(history)
-    );
-    console.log("Chat message saved to localStorage");
-  }
-  
-  // Helper function to get chat history from localStorage only
-  function getChatHistoryFromLocalStorage(nicheId: string): ChatMessage[] {
-    const storedHistory = localStorage.getItem(`${LOCAL_STORAGE_CHAT_HISTORY_KEY}_${nicheId}`);
-    if (storedHistory) {
-      try {
-        return JSON.parse(storedHistory);
-      } catch (error) {
-        console.error("Error parsing local chat history:", error);
-        return [];
-      }
-    }
+    console.error("Error retrieving chat history:", error);
     return [];
   }
-}
+};
 
-export async function deleteChatMessage(timestamp: number, nicheId: string): Promise<void> {
+// Save a new message to chat history
+export const saveChatMessage = (message: ChatMessage): void => {
   try {
-    // Try to delete from Supabase first
-    const { data: session } = await supabase.auth.getSession();
-    if (session.session) {
-      const timestampIso = new Date(timestamp).toISOString();
-      
-      const { error } = await supabase
-        .from('chat_history')
-        .delete()
-        .eq('user_id', session.session.user.id)
-        .eq('niche_id', nicheId)
-        .eq('timestamp', timestampIso);
-      
-      if (error) {
-        console.error("Error deleting chat message from database:", error);
-      } else {
-        console.log("Chat message deleted from database");
-        return; // Success - exit function
-      }
-    }
-  } catch (error) {
-    console.error("Error during chat message deletion:", error);
-  }
-  
-  // Fallback to deleting from localStorage
-  try {
-    const localStorageKey = `${LOCAL_STORAGE_CHAT_HISTORY_KEY}_${nicheId}`;
-    const storedHistory = localStorage.getItem(localStorageKey);
+    const historyString = localStorage.getItem(CHAT_HISTORY_KEY);
+    const historyByNiche: ChatHistoryByNiche = historyString ? JSON.parse(historyString) : {};
     
-    if (storedHistory) {
-      const messages = JSON.parse(storedHistory) as ChatMessage[];
-      const filteredMessages = messages.filter(msg => msg.timestamp !== timestamp);
-      
-      if (filteredMessages.length < messages.length) {
-        localStorage.setItem(localStorageKey, JSON.stringify(filteredMessages));
-        console.log("Chat message deleted from localStorage");
-      }
+    if (!historyByNiche[message.nicheId]) {
+      historyByNiche[message.nicheId] = [];
     }
-  } catch (localError) {
-    console.error("Error deleting chat message from localStorage:", localError);
-  }
-}
-
-export async function clearChatHistory(nicheId: string): Promise<void> {
-  try {
-    // Try to clear from Supabase first
-    const { data: session } = await supabase.auth.getSession();
-    if (session.session) {
-      const { error } = await supabase
-        .from('chat_history')
-        .delete()
-        .eq('user_id', session.session.user.id)
-        .eq('niche_id', nicheId);
-      
-      if (error) {
-        console.error("Error clearing chat history from database:", error);
-      } else {
-        console.log("Chat history cleared from database");
-      }
-    }
-  } catch (error) {
-    console.error("Error during chat history clearing:", error);
-  }
-  
-  // Also clear from localStorage for consistency
-  localStorage.removeItem(`${LOCAL_STORAGE_CHAT_HISTORY_KEY}_${nicheId}`);
-  console.log("Chat history cleared from localStorage");
-}
-
-// Post generation and related functions
-export async function generatePost(nicheId: string, topic?: string): Promise<string> {
-  // Check if free trial is exhausted and user doesn't have API key
-  const userApiKey = await getApiKey();
-  const freeTrialExhausted = await isFreeTrialExhausted();
-  
-  if (!userApiKey && freeTrialExhausted) {
-    throw new Error("Free trial exhausted. Please enter your API key.");
-  }
-
-  // Use user's API key if available, otherwise use free trial API key
-  const apiKey = userApiKey || FREE_TRIAL_API_KEY;
-  
-  // If using free trial API key, increment usage
-  if (!userApiKey) {
-    await incrementFreeTrialUsage();
-  }
-
-  // Create prompt based on niche and topic
-  const userPrompt = topic 
-    ? `Create a Twitter post about ${topic} for the ${nicheId} niche.`
-    : `Create a Twitter post for the ${nicheId} niche.`;
-
-  // Generate post using Gemini
-  try {
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: GEMINI_MODEL });
     
-    // Record user message
-    const userMessage: ChatMessage = {
+    // Add the new message
+    historyByNiche[message.nicheId].push(message);
+    
+    // Limit history to last 10 messages per niche to avoid localStorage size issues
+    if (historyByNiche[message.nicheId].length > 10) {
+      historyByNiche[message.nicheId] = historyByNiche[message.nicheId].slice(-10);
+    }
+    
+    localStorage.setItem(CHAT_HISTORY_KEY, JSON.stringify(historyByNiche));
+  } catch (error) {
+    console.error("Error saving chat message to history:", error);
+  }
+};
+
+// Clear all chat history
+export const clearChatHistory = (): void => {
+  localStorage.removeItem(CHAT_HISTORY_KEY);
+};
+
+export const generatePost = async (
+  niche: string,
+  specificTopic?: string
+): Promise<string> => {
+  try {
+    // Get existing chat history for this niche
+    const chatHistory = getChatHistory(niche);
+    
+    // Check if we should use the free trial key
+    if (!userApiKey && !isFreeTrialExhausted()) {
+      // Use the free trial key
+      genAI = new GoogleGenerativeAI(FREE_TRIAL_KEY);
+      
+      // Track free trial usage
+      incrementFreeTrialUsage();
+    } else if (!userApiKey && isFreeTrialExhausted()) {
+      // Free trial exhausted, but no user API key
+      throw new Error("Free trial exhausted. Please enter your API key.");
+    } else if (userApiKey) {
+      // Use user's API key
+      genAI = new GoogleGenerativeAI(userApiKey);
+    } else {
+      // Use mock responses as fallback
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      if (specificTopic) {
+        return `Here's a post about ${specificTopic}: ${getRandomResponse(MOCK_RESPONSES.default)}`;
+      }
+      
+      const nicheResponses = MOCK_RESPONSES[niche] || MOCK_RESPONSES.default;
+      return getRandomResponse(nicheResponses);
+    }
+
+    // Use Gemini if we have an API key
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.0-flash",
+    });
+
+    // Create a chat session
+    const chat = model.startChat({
+      history: chatHistory.map(msg => ({
+        role: msg.role as "user" | "model",
+        parts: [{ text: msg.parts }]
+      })),
+      generationConfig: {
+        temperature: 1,
+        topP: 0.95,
+        topK: 40,
+        maxOutputTokens: 65, // Changed from 280 to 65 as per user request
+      },
+    });
+
+    let prompt = "";
+    if (specificTopic) {
+      prompt = `Create a Twitter post about ${specificTopic}. The post must be engaging, informative, and include relevant hashtags. Keep it under Twitter's character limit. Respond with just the text of the post, nothing else.`;
+    } else {
+      prompt = `Create a Twitter post about a topic in the ${niche} niche. The post must be engaging, informative, and include relevant hashtags. Keep it under Twitter's character limit. Respond with just the text of the post, nothing else.`;
+    }
+
+    // Save user message to history
+    saveChatMessage({
       role: "user",
-      parts: userPrompt,
+      parts: prompt,
       timestamp: Date.now(),
-      nicheId,
-      topic
-    };
-    await saveChatMessage(userMessage);
-    
-    // Generate content
-    const result = await model.generateContent(userPrompt);
+      nicheId: niche,
+      topic: specificTopic
+    });
+
+    // Send the message
+    const result = await chat.sendMessage(prompt);
     const text = result.response.text();
     
-    // Record model response
-    const modelMessage: ChatMessage = {
+    // Save model response to history
+    saveChatMessage({
       role: "model",
       parts: text,
       timestamp: Date.now(),
-      nicheId,
-      topic
-    };
-    await saveChatMessage(modelMessage);
+      nicheId: niche,
+      topic: specificTopic
+    });
     
     return text;
   } catch (error) {
-    console.error("Error generating post:", error);
-    throw error;
+    console.error("Error generating post with Gemini:", error);
+    
+    if (error instanceof Error && error.message === "Free trial exhausted. Please enter your API key.") {
+      toast.error("Free trial exhausted. Please enter your API key.");
+      throw error;
+    }
+    
+    toast.error("Failed to generate post with Gemini API");
+    
+    // Fallback to mock responses
+    if (specificTopic) {
+      return `Here's a post about ${specificTopic}: ${getRandomResponse(MOCK_RESPONSES.default)}`;
+    }
+    
+    const nicheResponses = MOCK_RESPONSES[niche] || MOCK_RESPONSES.default;
+    return getRandomResponse(nicheResponses);
   }
-}
+};
 
-// Mock function for sharing to Twitter (not implemented yet)
-export async function postToTwitter(content: string): Promise<boolean> {
-  // This would be implemented with Twitter API
-  console.log("Sharing to Twitter:", content);
-  return true;
-}
+export const generateAlternativePost = async (
+  niche: string,
+  specificTopic?: string
+): Promise<string> => {
+  try {
+    // Get existing chat history for this niche
+    const chatHistory = getChatHistory(niche);
+    
+    // If we don't have an API key, use the original generatePost function
+    if (!genAI || !userApiKey) {
+      return generatePost(niche, specificTopic);
+    }
 
-// Export supabase for use in AuthContext
-export { supabase };
+    // Use Gemini if we have an API key
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.0-flash",
+    });
+
+    // Create a chat session with history
+    const chat = model.startChat({
+      history: chatHistory.map(msg => ({
+        role: msg.role as "user" | "model",
+        parts: [{ text: msg.parts }]
+      })),
+      generationConfig: {
+        temperature: 1,
+        topP: 0.95,
+        topK: 40,
+        maxOutputTokens: 65, // Changed from 280 to 65 as per user request
+      },
+    });
+
+    let prompt = "";
+    if (specificTopic) {
+      prompt = `Create a different Twitter post about ${specificTopic}. The previous one wasn't quite right. Make this one more engaging, informative, and include relevant hashtags. Keep it under Twitter's character limit. Respond with just the text of the post, nothing else.`;
+    } else {
+      prompt = `Create a different Twitter post about a topic in the ${niche} niche. The previous one wasn't quite right. Make this one more engaging, informative, and include relevant hashtags. Keep it under Twitter's character limit. Respond with just the text of the post, nothing else.`;
+    }
+
+    // Save user message to history
+    saveChatMessage({
+      role: "user",
+      parts: prompt,
+      timestamp: Date.now(),
+      nicheId: niche,
+      topic: specificTopic
+    });
+
+    // Send the message
+    const result = await chat.sendMessage(prompt);
+    const text = result.response.text();
+    
+    // Save model response to history
+    saveChatMessage({
+      role: "model",
+      parts: text,
+      timestamp: Date.now(),
+      nicheId: niche,
+      topic: specificTopic
+    });
+    
+    return text;
+  } catch (error) {
+    console.error("Error generating alternative post with Gemini:", error);
+    toast.error("Failed to generate alternative post with Gemini API");
+    
+    // Fallback to the original generatePost function
+    return generatePost(niche, specificTopic);
+  }
+};
+
+// Helper function to open Twitter with pre-populated post
+export const postToTwitter = (text: string): void => {
+  const twitterIntentUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+  window.open(twitterIntentUrl, '_blank');
+};

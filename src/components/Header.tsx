@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Settings, Moon, Sun, MessageSquare, Sparkles, LogOut } from "lucide-react";
+import { PlusCircle, Settings, Moon, Sun, MessageSquare, Sparkles } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import ApiKeyManager from "./ApiKeyManager";
@@ -10,7 +10,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useIsMobile } from "@/hooks/use-mobile";
 import { toast } from "sonner";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useAuth } from "@/context/AuthContext";
 
 interface HeaderProps {
   onGeneratePost: (specifyTopic?: boolean) => void;
@@ -26,21 +25,10 @@ const Header = ({
   const [sheetOpen, setSheetOpen] = useState(false);
   const [settingsTab, setSettingsTab] = useState<string>("niche");
   const isMobile = useIsMobile();
-  const { user, signOut } = useAuth();
   
   const toggleTheme = () => {
     setTheme(theme === "dark" ? "light" : "dark");
     toast.success(`Switched to ${theme === "dark" ? "light" : "dark"} mode`);
-  };
-
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-      window.location.href = '/';
-    } catch (error) {
-      console.error('Error signing out:', error);
-      toast.error('Failed to sign out');
-    }
   };
   
   return <div className="w-full border border-gray-200 dark:border-gray-800 sticky top-0 z-50 py-4 pb-1.5 rounded-b-lg bg-slate-300 dark:bg-gray-800">

@@ -11,7 +11,6 @@ import NotFound from "./pages/NotFound";
 import TwitterPostGenerator from "./pages/TwitterPostGenerator";
 import { useTheme } from "./hooks/useTheme";
 import { useIsMobile } from "./hooks/use-mobile";
-import { AuthProvider } from "./context/AuthContext";
 
 const queryClient = new QueryClient();
 
@@ -52,7 +51,7 @@ const App = () => {
       "keywords": "twitter posts, social media, content creation, AI writer, tweet generator, social media automation, twitter marketing",
       "inLanguage": "en-US",
       "datePublished": "2023-09-01",
-      "dateModified": "2025-04-11",
+      "dateModified": "2025-04-04",
       "mainEntityOfPage": {
         "@type": "WebPage",
         "@id": "https://twitposter.app/"
@@ -90,30 +89,28 @@ const App = () => {
     return (
       <React.StrictMode>
         <QueryClientProvider client={queryClient}>
-          <AuthProvider>
-            <Helmet>
-              <title>TwitPoster - AI Twitter Post Generator | Create Viral Content</title>
-              <meta name="description" content="Generate high-engagement Twitter posts with TwitPoster AI. Our AI-powered tool creates niche-specific content that drives engagement, increases followers, and grows your audience." />
-              <meta name="keywords" content="twitter posts, social media, content creation, AI writer, tweet generator, social media automation, twitter marketing, viral tweets, engagement posts, AI twitter tool, twitter content creator, X posts" />
-              <script type="application/ld+json">
-                {JSON.stringify(jsonLd)}
-              </script>
-            </Helmet>
-            <BrowserRouter>
-              <TooltipProvider>
-                <div className="min-h-screen bg-gradient-to-br from-white to-twitter-extraLightGray dark:from-gray-900 dark:to-gray-800 transition-all duration-300">
-                  <Routes>
-                    <Route path="/" element={<Index />} />
-                    <Route path="/twitter_post_generator" element={<TwitterPostGenerator />} />
-                    {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </div>
-                <Toaster />
-                <Sonner />
-              </TooltipProvider>
-            </BrowserRouter>
-          </AuthProvider>
+          <Helmet>
+            <title>TwitPoster - AI Twitter Post Generator | Create Viral Content</title>
+            <meta name="description" content="Generate high-engagement Twitter posts with TwitPoster AI. Our AI-powered tool creates niche-specific content that drives engagement, increases followers, and grows your audience." />
+            <meta name="keywords" content="twitter posts, social media, content creation, AI writer, tweet generator, social media automation, twitter marketing, viral tweets, engagement posts, AI twitter tool, twitter content creator, X posts" />
+            <script type="application/ld+json">
+              {JSON.stringify(jsonLd)}
+            </script>
+          </Helmet>
+          <BrowserRouter>
+            <TooltipProvider>
+              <div className="min-h-screen bg-gradient-to-br from-white to-twitter-extraLightGray dark:from-gray-900 dark:to-gray-800 transition-all duration-300">
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/twitter_post_generator" element={<TwitterPostGenerator />} />
+                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </div>
+              <Toaster />
+              <Sonner />
+            </TooltipProvider>
+          </BrowserRouter>
         </QueryClientProvider>
       </React.StrictMode>
     );
@@ -123,21 +120,19 @@ const App = () => {
     return (
       <React.StrictMode>
         <QueryClientProvider client={queryClient}>
-          <AuthProvider>
-            <BrowserRouter>
-              <TooltipProvider>
-                <div className="min-h-screen bg-white">
-                  <Routes>
-                    <Route path="/" element={<Index />} />
-                    <Route path="/twitter_post_generator" element={<TwitterPostGenerator />} />
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                  <Toaster />
-                  <Sonner />
-                </div>
-              </TooltipProvider>
-            </BrowserRouter>
-          </AuthProvider>
+          <BrowserRouter>
+            <TooltipProvider>
+              <div className="min-h-screen bg-white">
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/twitter_post_generator" element={<TwitterPostGenerator />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+                <Toaster />
+                <Sonner />
+              </div>
+            </TooltipProvider>
+          </BrowserRouter>
         </QueryClientProvider>
       </React.StrictMode>
     );

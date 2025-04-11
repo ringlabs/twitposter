@@ -1,19 +1,9 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { LOCAL_STORAGE_NICHE_KEY } from "@/constants/niches";
-import { 
-  generatePost, 
-  isFreeTrialExhausted, 
-  getFreeTrialUsage, 
-  getApiKey, 
-  getChatHistory, 
-  saveChatMessage, 
-  clearChatHistory,
-  deleteChatMessage
-} from "@/services/postGeneratorService";
+import { generatePost, isFreeTrialExhausted, getFreeTrialUsage, getApiKey, getChatHistory, saveChatMessage, clearChatHistory } from "@/services/postGeneratorService";
 import GeneratedPost from "./GeneratedPost";
 import { NICHES } from "@/constants/niches";
 import { Sparkles, MessageCircle } from "lucide-react";
@@ -45,48 +35,26 @@ const PostGenerator = () => {
     name: "General"
   };
 
-  const [freeTrialRemaining, setFreeTrialRemaining] = useState(0);
-  const [hasFreeTrialPosts, setHasFreeTrialPosts] = useState(false);
-  const [userHasApiKey, setUserHasApiKey] = useState(false);
+  const hasFreeTrialPosts = !isFreeTrialExhausted();
+  const freeTrialRemaining = 10 - getFreeTrialUsage();
+  const userHasApiKey = !!getApiKey();
 
   useEffect(() => {
-    const loadUserStatus = async () => {
-      const freeTrialExhausted = await isFreeTrialExhausted();
-      const freeTrialUsage = await getFreeTrialUsage();
-      const apiKey = await getApiKey();
-      
-      setHasFreeTrialPosts(!freeTrialExhausted);
-      setFreeTrialRemaining(10 - freeTrialUsage);
-      setUserHasApiKey(!!apiKey);
-    };
-    
-    loadUserStatus();
-  }, []);
-
-  useEffect(() => {
-    const loadPosts = async () => {
-      // Try to load from localStorage first for fast loading
-      const savedPosts = localStorage.getItem(POSTS_STORAGE_KEY);
-      if (savedPosts) {
-        try {
-          const parsedPosts = JSON.parse(savedPosts) as Post[];
-          if (parsedPosts && parsedPosts.length > 0) {
-            console.log("Loaded saved posts from localStorage:", parsedPosts);
-            setPostHistory(parsedPosts);
-            
-            // Still load from chat history to ensure we have the latest
-            reconstructPostsFromChatHistory();
-            return;
-          }
-        } catch (error) {
-          console.error("Error parsing saved posts:", error);
+    const savedPosts = localStorage.getItem(POSTS_STORAGE_KEY);
+    if (savedPosts) {
+      try {
+        const parsedPosts = JSON.parse(savedPosts) as Post[];
+        if (parsedPosts && parsedPosts.length > 0) {
+          console.log("Loaded saved posts from localStorage:", parsedPosts);
+          setPostHistory(parsedPosts);
+          return;
         }
+      } catch (error) {
+        console.error("Error parsing saved posts:", error);
       }
-      
-      reconstructPostsFromChatHistory();
-    };
+    }
     
-    loadPosts();
+    reconstructPostsFromChatHistory();
   }, []);
 
   useEffect(() => {
@@ -96,26 +64,22 @@ const PostGenerator = () => {
     }
   }, [postHistory]);
 
-  const reconstructPostsFromChatHistory = async () => {
-    try {
-      const chatHistory = await getChatHistory(selectedNicheId);
-      const modelMessages = chatHistory.filter(msg => msg.role === "model");
+  const reconstructPostsFromChatHistory = () => {
+    const chatHistory = getChatHistory(selectedNicheId);
+    const modelMessages = chatHistory.filter(msg => msg.role === "model");
+    
+    if (modelMessages.length > 0) {
+      const reconstructedPosts = modelMessages.map(msg => ({
+        id: msg.timestamp.toString(),
+        content: msg.parts,
+        timestamp: msg.timestamp,
+        nicheId: msg.nicheId,
+        topic: msg.topic
+      }));
       
-      if (modelMessages.length > 0) {
-        const reconstructedPosts = modelMessages.map(msg => ({
-          id: msg.timestamp.toString(),
-          content: msg.parts,
-          timestamp: msg.timestamp,
-          nicheId: msg.nicheId,
-          topic: msg.topic
-        }));
-        
-        setPostHistory(reconstructedPosts);
-        localStorage.setItem(POSTS_STORAGE_KEY, JSON.stringify(reconstructedPosts));
-        console.log("Reconstructed posts from chat history:", reconstructedPosts);
-      }
-    } catch (error) {
-      console.error("Error reconstructing posts from chat history:", error);
+      setPostHistory(reconstructedPosts);
+      localStorage.setItem(POSTS_STORAGE_KEY, JSON.stringify(reconstructedPosts));
+      console.log("Reconstructed posts from chat history:", reconstructedPosts);
     }
   };
 
@@ -134,42 +98,23 @@ const PostGenerator = () => {
     });
   };
 
-  const deletePost = async (postId: string) => {
+  const deletePost = (postId: string) => {
     const postToDelete = postHistory.find(post => post.id === postId);
     
     if (postToDelete) {
       setPostHistory(prevPosts => prevPosts.filter(post => post.id !== postId));
       
-      // Delete from database/localStorage
-      try {
-        const timestamp = parseInt(postId, 10);
-        
-        // First, find and delete the model message
-        await deleteChatMessage(timestamp, selectedNicheId);
-        
-        // Second, try to find and delete the related user message (usually right before this one)
-        // This is a bit tricky without having exact timestamps, so we get chat history again
-        const chatHistory = await getChatHistory(selectedNicheId);
-        const modelIndex = chatHistory.findIndex(msg => 
-          msg.role === "model" && msg.timestamp === timestamp
-        );
-        
-        if (modelIndex > 0) {
-          // User message is typically right before the model message
-          const userMessage = chatHistory[modelIndex - 1];
-          if (userMessage && userMessage.role === "user") {
-            await deleteChatMessage(userMessage.timestamp, selectedNicheId);
-          }
-        }
-        
-        // Update localStorage cache too
-        localStorage.setItem(POSTS_STORAGE_KEY, JSON.stringify(
-          postHistory.filter(post => post.id !== postId)
-        ));
-        
-      } catch (error) {
-        console.error("Error deleting messages:", error);
-        toast.error("Error deleting post");
+      const chatHistory = getChatHistory(selectedNicheId);
+      const timestamp = parseInt(postId, 10);
+      
+      const modelIndex = chatHistory.findIndex(msg => 
+        msg.role === "model" && msg.timestamp === timestamp
+      );
+      
+      if (modelIndex > 0) {
+        chatHistory.splice(modelIndex - 1, 2);
+        clearChatHistory();
+        chatHistory.forEach(msg => saveChatMessage(msg));
       }
     }
   };
@@ -185,7 +130,6 @@ const PostGenerator = () => {
       addPostToHistory(post);
       if (!userHasApiKey && hasFreeTrialPosts) {
         const remainingPosts = freeTrialRemaining - 1;
-        setFreeTrialRemaining(remainingPosts);
         toast.info(`You have ${remainingPosts} free trial posts remaining`);
       }
     } catch (error) {
@@ -214,7 +158,6 @@ const PostGenerator = () => {
       setSpecificTopic("");
       if (!userHasApiKey && hasFreeTrialPosts) {
         const remainingPosts = freeTrialRemaining - 1;
-        setFreeTrialRemaining(remainingPosts);
         toast.info(`You have ${remainingPosts} free trial posts remaining`);
       }
     } catch (error) {
