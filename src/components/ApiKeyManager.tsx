@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -21,7 +20,6 @@ const ApiKeyManager = () => {
   const { signOut } = useAuth();
 
   useEffect(() => {
-    // Check if page is in an iframe or being rendered by puppeteer
     try {
       const isIframe = window.self !== window.top;
       const isPuppeteer = navigator.userAgent.includes('puppeteer');
@@ -90,19 +88,15 @@ const ApiKeyManager = () => {
 
   const handleClearAllData = async () => {
     try {
-      // Clear API Key
       await clearApiKey();
       setSavedApiKey(null);
       
-      // Clear chat history
-      await clearChatHistory();
+      await clearChatHistory("all");
       
       toast.success("All app data cleared successfully");
       
-      // Sign out
       await signOut();
       
-      // Redirect to home page after a short delay
       setTimeout(() => {
         window.location.href = "/";
       }, 1500);
@@ -208,7 +202,6 @@ const ApiKeyManager = () => {
             Sign Out
           </Button>
 
-          {/* Show the delete all data button if in iframe/puppeteer environment or in settings */}
           {isInIframe && (
             <Button 
               variant="destructive" 
