@@ -9,7 +9,63 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      chat_history: {
+        Row: {
+          content: string
+          id: string
+          niche_id: string
+          role: string
+          timestamp: string
+          topic: string | null
+          user_id: string
+        }
+        Insert: {
+          content: string
+          id?: string
+          niche_id: string
+          role: string
+          timestamp?: string
+          topic?: string | null
+          user_id: string
+        }
+        Update: {
+          content?: string
+          id?: string
+          niche_id?: string
+          role?: string
+          timestamp?: string
+          topic?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_settings: {
+        Row: {
+          created_at: string
+          free_trial_used: number
+          gemini_api_key: string | null
+          id: string
+          niche_preference: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          free_trial_used?: number
+          gemini_api_key?: string | null
+          id: string
+          niche_preference?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          free_trial_used?: number
+          gemini_api_key?: string | null
+          id?: string
+          niche_preference?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

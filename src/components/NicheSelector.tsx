@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { NICHES, LOCAL_STORAGE_NICHE_KEY } from "@/constants/niches";
 import { toast } from "sonner";
+import { setNichePreference, getNichePreference } from "@/services/postGeneratorService";
 
 interface NicheSelectorProps {
   onComplete: () => void;
@@ -12,32 +13,45 @@ interface NicheSelectorProps {
 
 const NicheSelector = ({ onComplete, inSettings = false }: NicheSelectorProps) => {
   const [selectedNiche, setSelectedNiche] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     // Load currently selected niche
-    const savedNiche = localStorage.getItem(LOCAL_STORAGE_NICHE_KEY);
-    if (savedNiche) {
-      setSelectedNiche(savedNiche);
-    }
+    const loadNiche = async () => {
+      const savedNiche = await getNichePreference();
+      if (savedNiche) {
+        setSelectedNiche(savedNiche);
+      }
+    };
+    
+    loadNiche();
   }, []);
 
   const handleNicheSelect = (nicheId: string) => {
     setSelectedNiche(nicheId);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!selectedNiche) {
       toast.error("Please select a niche first");
       return;
     }
 
-    localStorage.setItem(LOCAL_STORAGE_NICHE_KEY, selectedNiche);
-    toast.success("Niche preference saved!");
-    onComplete();
-    
-    if (inSettings) {
-      // Reload the page to apply the new niche
-      window.location.reload();
+    setIsLoading(true);
+    try {
+      await setNichePreference(selectedNiche);
+      toast.success("Niche preference saved!");
+      onComplete();
+      
+      if (inSettings) {
+        // Reload the page to apply the new niche
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error("Error saving niche preference:", error);
+      toast.error("Failed to save niche preference");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -63,8 +77,9 @@ const NicheSelector = ({ onComplete, inSettings = false }: NicheSelectorProps) =
         <Button 
           onClick={handleSubmit} 
           className="w-full bg-twitter-blue hover:bg-twitter-darkBlue dark:text-white"
+          disabled={isLoading}
         >
-          Save Niche
+          {isLoading ? "Saving..." : "Save Niche"}
         </Button>
       </div>
     );
@@ -107,9 +122,9 @@ const NicheSelector = ({ onComplete, inSettings = false }: NicheSelectorProps) =
             onClick={handleSubmit} 
             size="lg"
             className="w-full max-w-md bg-twitter-blue hover:bg-twitter-darkBlue dark:text-white font-medium text-lg py-6"
-            disabled={!selectedNiche}
+            disabled={!selectedNiche || isLoading}
           >
-            Continue
+            {isLoading ? "Saving..." : "Continue"}
           </Button>
         </CardFooter>
       </Card>

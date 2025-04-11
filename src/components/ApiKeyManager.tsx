@@ -3,17 +3,21 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { clearApiKey, getApiKey, setApiKey, clearChatHistory, getFreeTrialUsage } from "@/services/postGeneratorService";
+import { clearApiKey, getApiKey, setApiKey, clearChatHistory, getFreeTrialUsage, supabase } from "@/services/postGeneratorService";
 import GoogleApiKeyTutorial from "./GoogleApiKeyTutorial";
-import { AlertTriangle, CheckCircle, Key, Trash2 } from "lucide-react";
+import { AlertTriangle, CheckCircle, Key, Trash2, LogOut } from "lucide-react";
 import { toast } from "sonner";
+import { useAuth } from "@/context/AuthContext";
 
 const ApiKeyManager = () => {
   const [apiKey, setApiKeyState] = useState("");
   const [savedApiKey, setSavedApiKey] = useState<string | null>(null);
   const [isInIframe, setIsInIframe] = useState(false);
   const [tutorialExpanded, setTutorialExpanded] = useState(false);
-  const freeTrialRemaining = 10 - getFreeTrialUsage(); // Added to display remaining free trial posts
+  const [freeTrialRemaining, setFreeTrialRemaining] = useState(10);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  const { signOut } = useAuth();
 
   useEffect(() => {
     // Check if page is in an iframe or being rendered by puppeteer
@@ -27,56 +31,107 @@ const ApiKeyManager = () => {
   }, []);
 
   useEffect(() => {
-    const key = getApiKey();
-    setSavedApiKey(key);
+    const loadData = async () => {
+      setIsLoading(true);
+      try {
+        const key = await getApiKey();
+        setSavedApiKey(key);
+        
+        const usage = await getFreeTrialUsage();
+        setFreeTrialRemaining(10 - usage);
+      } catch (error) {
+        console.error("Error loading API key data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadData();
   }, []);
 
-  const handleSaveApiKey = () => {
+  const handleSaveApiKey = async () => {
     if (!apiKey.trim()) {
       toast.error("Please enter an API key");
       return;
     }
 
-    setApiKey(apiKey);
-    setSavedApiKey(apiKey);
-    setApiKeyState("");
-    toast.success("API key saved successfully");
+    try {
+      await setApiKey(apiKey);
+      setSavedApiKey(apiKey);
+      setApiKeyState("");
+      toast.success("API key saved successfully");
+    } catch (error) {
+      console.error("Error saving API key:", error);
+      toast.error("Failed to save API key");
+    }
   };
 
-  const handleRemoveApiKey = () => {
-    clearApiKey();
-    setSavedApiKey(null);
-    toast.success("API key removed");
+  const handleRemoveApiKey = async () => {
+    try {
+      await clearApiKey();
+      setSavedApiKey(null);
+      toast.success("API key removed");
+    } catch (error) {
+      console.error("Error removing API key:", error);
+      toast.error("Failed to remove API key");
+    }
   };
 
-  const handleClearAllData = () => {
-    // Clear API Key
-    clearApiKey();
-    setSavedApiKey(null);
-    
-    // Clear chat history
-    clearChatHistory();
-    
-    // Clear niche selection
-    localStorage.removeItem("selected_niche");
-    
-    // Clear post history
-    localStorage.removeItem("twitter_generated_posts");
-    
-    // Clear free trial usage
-    localStorage.removeItem("free_trial_usage");
-    
-    toast.success("All app data cleared successfully");
-    
-    // Redirect to home page after a short delay
-    setTimeout(() => {
-      window.location.href = "/";
-    }, 1500);
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      toast.success("Signed out successfully");
+    } catch (error) {
+      console.error("Error signing out:", error);
+      toast.error("Failed to sign out");
+    }
+  };
+
+  const handleClearAllData = async () => {
+    try {
+      // Clear API Key
+      await clearApiKey();
+      setSavedApiKey(null);
+      
+      // Clear chat history
+      await clearChatHistory();
+      
+      toast.success("All app data cleared successfully");
+      
+      // Sign out
+      await signOut();
+      
+      // Redirect to home page after a short delay
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 1500);
+    } catch (error) {
+      console.error("Error clearing data:", error);
+      toast.error("Failed to clear data");
+    }
   };
 
   const toggleTutorial = () => {
     setTutorialExpanded(prev => !prev);
   };
+
+  if (isLoading) {
+    return (
+      <Card className="dark:bg-gray-800 shadow-md border-gray-200 dark:border-gray-700">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-xl dark:text-white flex items-center">
+            <Key className="mr-2 h-5 w-5 text-twitter-blue" />
+            API Key Manager
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-40 flex items-center justify-center">
+            <div className="animate-spin h-6 w-6 border-2 border-twitter-blue border-t-transparent rounded-full"></div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="dark:bg-gray-800 shadow-md border-gray-200 dark:border-gray-700">
@@ -123,7 +178,11 @@ const ApiKeyManager = () => {
               type="password"
               className="flex-1 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             />
-            <Button onClick={handleSaveApiKey} variant="outline" className="dark:border-gray-600 dark:text-white dark:hover:bg-gray-700">
+            <Button 
+              onClick={handleSaveApiKey} 
+              variant="outline" 
+              className="dark:border-gray-600 dark:text-white dark:hover:bg-gray-700"
+            >
               Save
             </Button>
           </div>
@@ -138,6 +197,15 @@ const ApiKeyManager = () => {
               Remove API Key
             </Button>
           )}
+
+          <Button 
+            variant="outline" 
+            className="w-full mt-4 border-gray-200 dark:border-gray-700 dark:text-gray-200"
+            onClick={handleSignOut}
+          >
+            <LogOut className="h-4 w-4 mr-2" />
+            Sign Out
+          </Button>
 
           {/* Show the delete all data button if in iframe/puppeteer environment or in settings */}
           {isInIframe && (
@@ -155,7 +223,7 @@ const ApiKeyManager = () => {
         <GoogleApiKeyTutorial isExpanded={tutorialExpanded} onToggle={toggleTutorial} />
       </CardContent>
       <CardFooter className="pt-2 text-xs text-gray-500 dark:text-gray-400">
-        Your API key is stored locally in your browser.
+        Your API key is stored securely in your Supabase account.
       </CardFooter>
     </Card>
   );
