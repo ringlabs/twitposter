@@ -3,7 +3,7 @@
 
 ## Project info
 
-**URL**: https://lovable.dev/projects/275bed51-8092-4ba6-a69c-f113091d6704
+**URL**: [https://lovable.dev/projects/275bed51-8092-4ba6-a69c-f113091d6704](https://twitposter.lovable.app/)
 
 ## How can I edit this code?
 
